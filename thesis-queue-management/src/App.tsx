@@ -67,7 +67,7 @@ interface DocType {
 }
 
 const CONFIG = {
-  university: 'Centro Escolar Las Piñas',
+  university: 'Centro Escolar University - Malolos',
   kioskName: 'Smart Registrar Service Kiosk',
   version: '1.0.0',
   queuePrefixes: { 'document-request': 'A', 'claim-document': 'B', inquiry: 'C', certification: 'D' } as Record<string, string>,
@@ -102,20 +102,20 @@ function getDefaultDB(): DB {
   }
   return {
     queue: [
-      { id: 'Q001', number: 'A042', studentName: 'Maria Santos', studentId: 'CELP-2024-0001', service: 'document-request', documentType: 'tor', counter: 'Counter 1', status: 'serving', position: 1, createdAt: g(9, 5), estimatedWait: 5 },
-      { id: 'Q002', number: 'A043', studentName: 'Juan Cruz', studentId: 'CELP-2024-0002', service: 'document-request', documentType: 'coe', counter: null, status: 'pending', position: 2, createdAt: g(9, 12), estimatedWait: 15 },
-      { id: 'Q003', number: 'A044', studentName: 'Pedro Reyes', studentId: 'CELP-2024-0003', service: 'document-request', documentType: 'cog', counter: null, status: 'pending', position: 3, createdAt: g(9, 18), estimatedWait: 25 },
-      { id: 'Q004', number: 'A045', studentName: 'Ana Gonzales', studentId: 'CELP-2024-0004', service: 'claim-document', documentType: 'tor', counter: null, status: 'pending', position: 4, createdAt: g(9, 20), estimatedWait: 20 },
-      { id: 'Q005', number: 'A046', studentName: 'Jose Garcia', studentId: 'CELP-2024-0005', service: 'inquiry', documentType: null, counter: null, status: 'pending', position: 5, createdAt: g(9, 25), estimatedWait: 10 },
-      { id: 'Q006', number: 'A047', studentName: 'Luisa Torres', studentId: 'CELP-2024-0006', service: 'document-request', documentType: 'diploma', counter: null, status: 'pending', position: 6, createdAt: g(9, 30), estimatedWait: 35 },
-      { id: 'Q007', number: 'A048', studentName: 'Carlos Mendoza', studentId: 'CELP-2024-0007', service: 'document-request', documentType: 'tor', counter: null, status: 'pending', position: 7, createdAt: g(9, 35), estimatedWait: 40 },
-      { id: 'Q008', number: 'A049', studentName: 'Sofia Lopez', studentId: 'CELP-2024-0008', service: 'document-request', documentType: 'honorable-dismissal', counter: null, status: 'pending', position: 8, createdAt: g(9, 40), estimatedWait: 45 },
-      { id: 'Q009', number: 'A050', studentName: 'Miguel Flores', studentId: 'CELP-2024-0009', service: 'claim-document', documentType: 'coe', counter: null, status: 'pending', position: 9, createdAt: g(9, 42), estimatedWait: 30 },
-      { id: 'Q010', number: 'A051', studentName: 'Isabella Ramos', studentId: 'CELP-2024-0010', service: 'document-request', documentType: 'certificate-graduation', counter: null, status: 'pending', position: 10, createdAt: g(9, 45), estimatedWait: 50 },
+      { id: 'Q001', number: 'A042', studentName: 'Maria Santos', studentId: 'CEU-2024-0001', service: 'document-request', documentType: 'tor', counter: 'Counter 1', status: 'serving', position: 1, createdAt: g(9, 5), estimatedWait: 5 },
+      { id: 'Q002', number: 'A043', studentName: 'Juan Cruz', studentId: 'CEU-2024-0002', service: 'document-request', documentType: 'coe', counter: null, status: 'pending', position: 2, createdAt: g(9, 12), estimatedWait: 15 },
+      { id: 'Q003', number: 'A044', studentName: 'Pedro Reyes', studentId: 'CEU-2024-0003', service: 'document-request', documentType: 'cog', counter: null, status: 'pending', position: 3, createdAt: g(9, 18), estimatedWait: 25 },
+      { id: 'Q004', number: 'A045', studentName: 'Ana Gonzales', studentId: 'CEU-2024-0004', service: 'claim-document', documentType: 'tor', counter: null, status: 'pending', position: 4, createdAt: g(9, 20), estimatedWait: 20 },
+      { id: 'Q005', number: 'A046', studentName: 'Jose Garcia', studentId: 'CEU-2024-0005', service: 'inquiry', documentType: null, counter: null, status: 'pending', position: 5, createdAt: g(9, 25), estimatedWait: 10 },
+      { id: 'Q006', number: 'A047', studentName: 'Luisa Torres', studentId: 'CEU-2024-0006', service: 'document-request', documentType: 'diploma', counter: null, status: 'pending', position: 6, createdAt: g(9, 30), estimatedWait: 35 },
+      { id: 'Q007', number: 'A048', studentName: 'Carlos Mendoza', studentId: 'CEU-2024-0007', service: 'document-request', documentType: 'tor', counter: null, status: 'pending', position: 7, createdAt: g(9, 35), estimatedWait: 40 },
+      { id: 'Q008', number: 'A049', studentName: 'Sofia Lopez', studentId: 'CEU-2024-0008', service: 'document-request', documentType: 'honorable-dismissal', counter: null, status: 'pending', position: 8, createdAt: g(9, 40), estimatedWait: 45 },
+      { id: 'Q009', number: 'A050', studentName: 'Miguel Flores', studentId: 'CEU-2024-0009', service: 'claim-document', documentType: 'coe', counter: null, status: 'pending', position: 9, createdAt: g(9, 42), estimatedWait: 30 },
+      { id: 'Q010', number: 'A051', studentName: 'Isabella Ramos', studentId: 'CEU-2024-0010', service: 'document-request', documentType: 'certificate-graduation', counter: null, status: 'pending', position: 10, createdAt: g(9, 45), estimatedWait: 50 },
     ],
     documents: [
-      { id: 'D001', queueId: 'Q001', studentName: 'Maria Santos', studentId: 'CELP-2024-0001', type: 'tor', purpose: 'Employment Requirement', copies: 2, status: 'processing', notes: '', createdAt: g(9, 5), updatedAt: g(9, 10) },
-      { id: 'D002', queueId: 'Q002', studentName: 'Juan Cruz', studentId: 'CELP-2024-0002', type: 'coe', purpose: 'Scholarship Application', copies: 1, status: 'pending', notes: '', createdAt: g(9, 12), updatedAt: g(9, 12) },
+      { id: 'D001', queueId: 'Q001', studentName: 'Maria Santos', studentId: 'CEU-2024-0001', type: 'tor', purpose: 'Employment Requirement', copies: 2, status: 'processing', notes: '', createdAt: g(9, 5), updatedAt: g(9, 10) },
+      { id: 'D002', queueId: 'Q002', studentName: 'Juan Cruz', studentId: 'CEU-2024-0002', type: 'coe', purpose: 'Scholarship Application', copies: 1, status: 'pending', notes: '', createdAt: g(9, 12), updatedAt: g(9, 12) },
     ],
     settings: { autoCallNext: true, estimatedMinutesPerTransaction: 10, maxQueuePerCounter: 15 },
     history: [],
@@ -575,8 +575,8 @@ function App() {
       <div className={`screen${screen === 'kiosk-welcome' ? ' active' : ''}`}>
         <div className="kiosk-header">
           <div className="kiosk-header-left">
-            <div className="kiosk-logo"><img src="/celp-logo.svg" alt="CELP" /></div>
-            <div className="kiosk-title"><h1>Smart Registrar Service Kiosk</h1><span>Centro Escolar Las Piñas</span></div>
+            <div className="kiosk-logo"><img src="/celp-logo.svg" alt="CEU" /></div>
+            <div className="kiosk-title"><h1>Smart Registrar Service Kiosk</h1><span>Centro Escolar University - Malolos</span></div>
           </div>
           <div className="kiosk-header-right">
             <div className="kiosk-time"><span className="time">{timeStr}</span><span className="date" style={{ fontSize: 11, opacity: 0.7 }}>{dateStr}</span></div>
@@ -596,7 +596,7 @@ function App() {
       <div className={`screen${screen === 'kiosk-services' ? ' active' : ''}`}>
         <div className="kiosk-header">
           <div className="kiosk-header-left">
-            <div className="kiosk-logo"><img src="/celp-logo.svg" alt="CELP" /></div>
+            <div className="kiosk-logo"><img src="/celp-logo.svg" alt="CEU" /></div>
             <div className="kiosk-title"><h1>Select Service</h1><span>Choose a transaction type</span></div>
           </div>
           <div className="kiosk-header-right"><button className="back-btn" onClick={() => showScreen('kiosk-welcome')}>← Back</button></div>
@@ -617,7 +617,7 @@ function App() {
       <div className={`screen${screen === 'document-request' ? ' active' : ''}`}>
         <div className="kiosk-header">
           <div className="kiosk-header-left">
-            <div className="kiosk-logo"><img src="/celp-logo.svg" alt="CELP" /></div>
+            <div className="kiosk-logo"><img src="/celp-logo.svg" alt="CEU" /></div>
             <div className="kiosk-title"><h1>Request Document</h1><span>Fill in your details</span></div>
           </div>
           <div className="kiosk-header-right"><button className="back-btn" onClick={() => { setLastQueueEntry(null); showScreen('kiosk-services') }}>← Back</button></div>
@@ -640,7 +640,7 @@ function App() {
           <div className="form-container">
             <form onSubmit={handleDocRequest}>
               <div className="form-row">
-                <div className="form-group"><label>Student ID</label><input type="text" placeholder="e.g. CELP-2024-XXXX" value={reqStudentId} onChange={e => setReqStudentId(e.target.value)} /></div>
+                <div className="form-group"><label>Student ID</label><input type="text" placeholder="e.g. CEU-2024-XXXX" value={reqStudentId} onChange={e => setReqStudentId(e.target.value)} /></div>
                 <div className="form-group"><label>Full Name *</label><input type="text" placeholder="Enter your full name" required value={reqName} onChange={e => setReqName(e.target.value)} /></div>
               </div>
               <div className="form-group">
@@ -669,7 +669,7 @@ function App() {
       <div className={`screen${screen === 'claim-document' ? ' active' : ''}`}>
         <div className="kiosk-header">
           <div className="kiosk-header-left">
-            <div className="kiosk-logo"><img src="/celp-logo.svg" alt="CELP" /></div>
+            <div className="kiosk-logo"><img src="/celp-logo.svg" alt="CEU" /></div>
             <div className="kiosk-title"><h1>Claim Document</h1><span>Claim your processed document</span></div>
           </div>
           <div className="kiosk-header-right"><button className="back-btn" onClick={() => { setLastQueueEntry(null); showScreen('kiosk-services') }}>← Back</button></div>
@@ -692,7 +692,7 @@ function App() {
           <div className="form-container">
             <form onSubmit={handleClaim}>
               <div className="form-row">
-                <div className="form-group"><label>Student ID</label><input type="text" placeholder="e.g. CELP-2024-XXXX" value={claimStudentId} onChange={e => setClaimStudentId(e.target.value)} /></div>
+                <div className="form-group"><label>Student ID</label><input type="text" placeholder="e.g. CEU-2024-XXXX" value={claimStudentId} onChange={e => setClaimStudentId(e.target.value)} /></div>
                 <div className="form-group"><label>Full Name *</label><input type="text" placeholder="Enter your full name" required value={claimName} onChange={e => setClaimName(e.target.value)} /></div>
               </div>
               <div className="form-group">
@@ -713,7 +713,7 @@ function App() {
       <div className={`screen${screen === 'inquiry' ? ' active' : ''}`}>
         <div className="kiosk-header">
           <div className="kiosk-header-left">
-            <div className="kiosk-logo"><img src="/celp-logo.svg" alt="CELP" /></div>
+            <div className="kiosk-logo"><img src="/celp-logo.svg" alt="CEU" /></div>
             <div className="kiosk-title"><h1>Registrar Inquiry</h1><span>Ask a question</span></div>
           </div>
           <div className="kiosk-header-right"><button className="back-btn" onClick={() => { setLastQueueEntry(null); showScreen('kiosk-services') }}>← Back</button></div>
@@ -748,7 +748,7 @@ function App() {
       <div className={`screen${screen === 'queue-result' ? ' active' : ''}`}>
         <div className="kiosk-header">
           <div className="kiosk-header-left">
-            <div className="kiosk-logo"><img src="/celp-logo.svg" alt="CELP" /></div>
+            <div className="kiosk-logo"><img src="/celp-logo.svg" alt="CEU" /></div>
             <div className="kiosk-title"><h1>Queue Assigned</h1><span>Your transaction is in queue</span></div>
           </div>
           <div className="kiosk-header-right"><button className="back-btn" onClick={() => showScreen('kiosk-services')}>← New Transaction</button></div>
@@ -782,7 +782,7 @@ function App() {
       <div className={`screen${screen === 'queue-monitor' ? ' active' : ''}`}>
         <div className="kiosk-header">
           <div className="kiosk-header-left">
-            <div className="kiosk-logo"><img src="/celp-logo.svg" alt="CELP" /></div>
+            <div className="kiosk-logo"><img src="/celp-logo.svg" alt="CEU" /></div>
             <div className="kiosk-title"><h1>Queue Monitor</h1><span>Live queue status</span></div>
           </div>
           <div className="kiosk-header-right"><button className="back-btn" onClick={() => showScreen('kiosk-services')}>← Back</button></div>
@@ -815,7 +815,7 @@ function App() {
       <div className={`screen${screen === 'status-check' ? ' active' : ''}`}>
         <div className="kiosk-header">
           <div className="kiosk-header-left">
-            <div className="kiosk-logo"><img src="/celp-logo.svg" alt="CELP" /></div>
+            <div className="kiosk-logo"><img src="/celp-logo.svg" alt="CEU" /></div>
             <div className="kiosk-title"><h1>Transaction Status</h1><span>Check your queue or document status</span></div>
           </div>
           <div className="kiosk-header-right"><button className="back-btn" onClick={() => showScreen('kiosk-services')}>← Back</button></div>
@@ -866,7 +866,7 @@ function App() {
       <div className={`screen${screen === 'interactive-map' ? ' active' : ''}`}>
         <div className="kiosk-header">
           <div className="kiosk-header-left">
-            <div className="kiosk-logo"><img src="/celp-logo.svg" alt="CELP" /></div>
+            <div className="kiosk-logo"><img src="/celp-logo.svg" alt="CEU" /></div>
             <div className="kiosk-title"><h1>Interactive Map</h1><span>Find your way around</span></div>
           </div>
           <div className="kiosk-header-right"><button className="back-btn" onClick={() => showScreen('kiosk-services')}>← Back</button></div>
@@ -899,7 +899,7 @@ function App() {
       <div className={`screen${screen === 'admin-login-screen' ? ' active' : ''}`}>
         <div className="login-screen">
           <div className="login-card">
-            <div className="logo-area"><div className="logo-icon"><img src="/celp-logo.svg" alt="CELP" /></div><h2>Admin Login</h2><p>Smart Registrar Service Kiosk — CELP</p></div>
+            <div className="logo-area"><div className="logo-icon"><img src="/celp-logo.svg" alt="CEU" /></div><h2>Admin Login</h2><p>Smart Registrar Service Kiosk — CEU Malolos</p></div>
             <form onSubmit={handleLogin}>
               <div className={`login-error${loginError ? ' show' : ''}`}>Invalid username or password.</div>
               <div className="form-group"><label>Username</label><input type="text" placeholder="Enter admin username" required value={loginUsername} onChange={e => setLoginUsername(e.target.value)} /></div>
@@ -915,7 +915,7 @@ function App() {
       <div className={`screen${screen === 'admin-panel' ? ' active' : ''}`}>
         <div className="admin-layout">
           <aside className="admin-sidebar">
-            <div className="admin-sidebar-header"><div className="logo-small"><img src="/celp-logo.svg" alt="CELP" /></div><div className="text"><h2>Registrar Admin</h2><span>CELP</span></div></div>
+            <div className="admin-sidebar-header"><div className="logo-small"><img src="/celp-logo.svg" alt="CEU" /></div><div className="text"><h2>Registrar Admin</h2><span>CEU Malolos</span></div></div>
             <nav className="admin-nav">
               {(['dashboard', 'queue', 'requests', 'analytics', 'settings'] as const).map(item => (
                 <button key={item} className={`admin-nav-item${adminScreen === `admin-${item}` ? ' active' : ''}`} onClick={() => handleAdminNav(`admin-${item}`)}>
