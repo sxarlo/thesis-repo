@@ -586,7 +586,7 @@ function App() {
         <div className="kiosk-body">
           <div className="welcome-screen">
             <div className="welcome-icon">🎓</div>
-            <div className="welcome-content"><h2>Welcome to CELP Registrar</h2><p>Your self-service platform for document requests, queue management, and registrar office navigation.</p></div>
+            <div className="welcome-content"><h2>Welcome to CEU Registrar</h2><p>Your self-service platform for document requests, queue management, and registrar office navigation.</p></div>
             <button className="welcome-btn" onClick={() => showScreen('kiosk-services')}><span>Touch to Start</span> <span>→</span></button>
           </div>
         </div>
