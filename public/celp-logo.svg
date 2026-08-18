@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Outer ring border -->
+  <circle cx="100" cy="100" r="98" fill="#B83B5E"/>
+  <circle cx="100" cy="100" r="95" fill="#fff"/>
+  <!-- Inner circle -->
+  <circle cx="100" cy="100" r="48" fill="#6B6B6B"/>
+  <circle cx="100" cy="100" r="48" fill="none" stroke="#B83B5E" stroke-width="1"/>
+  <!-- Top text - centered in white ring area -->
+  <text x="100" y="15" text-anchor="middle" font-family="Segoe UI, Arial, Helvetica, sans-serif" font-size="8.5" font-weight="700" fill="#B83B5E" letter-spacing="2.5">CENTRO ESCOLAR</text>
+  <text x="100" y="26" text-anchor="middle" font-family="Segoe UI, Arial, Helvetica, sans-serif" font-size="8" font-weight="700" fill="#B83B5E" letter-spacing="3.5">UNIVERSITY</text>
+  <!-- Bottom text -->
+  <text x="100" y="175" text-anchor="middle" font-family="Segoe UI, Arial, Helvetica, sans-serif" font-size="9.5" font-weight="700" fill="#B83B5E" letter-spacing="4">MALOLOS</text>
+  <text x="100" y="186" text-anchor="middle" font-family="Segoe UI, Arial, Helvetica, sans-serif" font-size="7.5" font-weight="700" fill="#B83B5E" letter-spacing="2.5">1975</text>
+  <!-- Shield -->
+  <path d="M 100 65 L 84 77 L 84 99 Q 84 110 100 114 Q 116 110 116 99 L 116 77 Z" fill="#B83B5E" stroke="#fff" stroke-width="0.8"/>
+  <path d="M 100 65 L 84 77 L 84 99 Q 84 110 100 114 Z" fill="#D4617A"/>
+  <!-- Torch -->
+  <rect x="97" y="74" width="6" height="14" rx="1.5" fill="#fff" opacity="0.9"/>
+  <ellipse cx="100" cy="73" rx="3.5" ry="4.5" fill="#FFE066"/>
+  <ellipse cx="100" cy="72" rx="2" ry="3" fill="#FFB300"/>
+  <!-- Book -->
+  <rect x="94" y="89" width="12" height="8" rx="1" fill="#fff" opacity="0.85"/>
+  <line x1="100" y1="89" x2="100" y2="97" stroke="#B83B5E" stroke-width="0.5"/>
+  <!-- Building -->
+  <rect x="106" y="80" width="9" height="11" rx="0.8" fill="#fff" opacity="0.8"/>
+  <polygon points="106,80 110.5,76 115,80" fill="#fff" opacity="0.8"/>
+  <!-- Laurel left -->
+  <g fill="none" stroke="#B83B5E" stroke-width="1.5">
+    <path d="M 72 108 Q 67 97 70 87"/>
+    <ellipse cx="69" cy="90" rx="2.5" ry="3.5" fill="#B83B5E" opacity="0.25" transform="rotate(-15 69 90)"/>
+    <ellipse cx="68" cy="96" rx="2.5" ry="3.5" fill="#B83B5E" opacity="0.25" transform="rotate(-5 68 96)"/>
+    <ellipse cx="69" cy="102" rx="2.5" ry="3.5" fill="#B83B5E" opacity="0.25" transform="rotate(5 69 102)"/>
+  </g>
+  <!-- Laurel right -->
+  <g fill="none" stroke="#B83B5E" stroke-width="1.5">
+    <path d="M 128 108 Q 133 97 130 87"/>
+    <ellipse cx="131" cy="90" rx="2.5" ry="3.5" fill="#B83B5E" opacity="0.25" transform="rotate(15 131 90)"/>
+    <ellipse cx="132" cy="96" rx="2.5" ry="3.5" fill="#B83B5E" opacity="0.25" transform="rotate(5 132 96)"/>
+    <ellipse cx="131" cy="102" rx="2.5" ry="3.5" fill="#B83B5E" opacity="0.25" transform="rotate(-5 131 102)"/>
+  </g>
+  <!-- CEU text in center -->
+  <text x="100" y="140" text-anchor="middle" font-family="Segoe UI, Arial, Helvetica, sans-serif" font-size="15" font-weight="900" fill="#B83B5E" letter-spacing="3">CEU</text>
+</svg>
