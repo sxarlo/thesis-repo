@@ -1,8 +1,8 @@
 import { useCallback, useState } from 'react'
-import type { QueueEntry } from '../types/queue'
+import type { AddToQueueOptions, CustomerType, Department, QueueEntry } from '../types/queue'
 
 export interface UseTransactionFormsOptions {
-  addToQueue: (name: string, sid: string, svc: string, docType: string | null) => QueueEntry
+  addToQueue: (name: string, sid: string, svc: string, docType: string | null, opts?: AddToQueueOptions) => QueueEntry
   notify: (msg: string, type?: string) => void
 }
 
@@ -15,6 +15,9 @@ export function useTransactionForms({ addToQueue, notify: showNotif }: UseTransa
   const [claimDocType, setClaimDocType] = useState('')
   const [inquiryName, setInquiryName] = useState('')
   const [inquiryMsg, setInquiryMsg] = useState('')
+  const [directName, setDirectName] = useState('')
+  const [directSid, setDirectSid] = useState('')
+  const [directCustomerType, setDirectCustomerType] = useState<CustomerType>('walk-in')
   const [lastQueueEntry, setLastQueueEntry] = useState<QueueEntry | null>(null)
 
   const handleDocRequest = useCallback((e: React.FormEvent) => {
@@ -44,6 +47,19 @@ export function useTransactionForms({ addToQueue, notify: showNotif }: UseTransa
     showNotif(`Queue #${entry.number} assigned!`, 'success')
   }, [inquiryName, inquiryMsg, addToQueue, showNotif])
 
+  const handleDirectQueue = useCallback((e: React.FormEvent, department: Department) => {
+    e.preventDefault()
+    if (!directName) { showNotif('Please fill in your name.', 'info'); return }
+    const entry = addToQueue(directName, directSid, department, null, {
+      department,
+      customerType: directCustomerType,
+      source: 'kiosk',
+    })
+    setLastQueueEntry(entry)
+    setDirectName(''); setDirectSid(''); setDirectCustomerType('walk-in')
+    showNotif(`Queue #${entry.number} assigned!`, 'success')
+  }, [directName, directSid, directCustomerType, addToQueue, showNotif])
+
   return {
     reqName,
     setReqName,
@@ -61,10 +77,17 @@ export function useTransactionForms({ addToQueue, notify: showNotif }: UseTransa
     setInquiryName,
     inquiryMsg,
     setInquiryMsg,
+    directName,
+    setDirectName,
+    directSid,
+    setDirectSid,
+    directCustomerType,
+    setDirectCustomerType,
     lastQueueEntry,
     setLastQueueEntry,
     handleDocRequest,
     handleClaim,
     handleInquiry,
+    handleDirectQueue,
   }
 }

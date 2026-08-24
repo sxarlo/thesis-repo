@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { CONFIG } from '../config'
+import { CONFIG, DEPARTMENTS } from '../config'
 import { getDefaultDB, loadFromStorage, saveToStorage } from '../services/storage'
-import type { DB, QueueEntry, SettingsForm } from '../types/queue'
+import type { AddToQueueOptions, DB, Department, QueueEntry, SettingsForm } from '../types/queue'
 import { assignNextPending } from '../utils/queue'
 
 export interface UseQueueDBOptions {
@@ -38,7 +38,8 @@ export function useQueueDB({ notify: showNotif }: UseQueueDBOptions) {
 
   const idCounter = useRef(0)
 
-  const addToQueue = useCallback((name: string, sid: string, svc: string, docType: string | null): QueueEntry => {
+  const addToQueue = useCallback((name: string, sid: string, svc: string, docType: string | null, opts: AddToQueueOptions = {}): QueueEntry => {
+    const department = opts.department ?? 'registrar'
     let maxNum = 0
     db.queue.forEach(q => {
       const m = parseInt(q.number.replace(/[A-Z]/g, ''), 10)
@@ -62,6 +63,10 @@ export function useQueueDB({ notify: showNotif }: UseQueueDBOptions) {
       position: cnt,
       createdAt: now,
       estimatedWait: cnt * 8,
+      department,
+      customerType: opts.customerType ?? 'student',
+      source: opts.source ?? 'kiosk',
+      transferredFrom: opts.transferredFrom ?? null,
     }
     updateDB(d => {
       const newQueue = [...d.queue, entry]
@@ -86,40 +91,48 @@ export function useQueueDB({ notify: showNotif }: UseQueueDBOptions) {
     return entry
   }, [db.queue, updateDB])
 
-  const callNext = useCallback(() => {
-    const result = assignNextPending(db.queue)
+  const callNext = useCallback((department: Department) => {
+    const counters = DEPARTMENTS[department].counters
+    const result = assignNextPending(db.queue.filter(q => q.department === department), counters)
     if ('reason' in result) {
       showNotif(result.reason === 'empty' ? 'No pending entries.' : 'The counter is full.', 'warning')
       return
     }
-    updateDB(d => {
-      const r = assignNextPending(d.queue)
-      if ('reason' in r) return d
-      return { ...d, queue: r.queue }
-    })
+    updateDB(d => ({
+      ...d,
+      queue: d.queue.map(q => q.id === result.called.id
+        ? { ...q, counter: result.counter, status: 'serving' as const, estimatedWait: 0 }
+        : q
+      ),
+    }))
     showNotif(`Called ${result.called.number} → ${result.counter}`, 'success')
   }, [db.queue, updateDB, showNotif])
 
   const autoCall = useCallback(() => {
-    let cur = db.queue
     const calls: { id: string; number: string; counter: string }[] = []
-    while (calls.length < 3) {
-      const r = assignNextPending(cur)
-      if ('reason' in r) break
-      cur = r.queue
-      calls.push({ id: r.called.id, number: r.called.number, counter: r.counter })
-    }
-    if (calls.length === 0) return
-    updateDB(d => {
-      const countersById = new Map(calls.map(c => [c.id, c.counter] as const))
-      return {
-        ...d,
-        queue: d.queue.map(q => {
-          const counter = countersById.get(q.id)
-          return counter ? { ...q, counter, status: 'serving' as const, estimatedWait: 0 } : q
-        }),
+    const updatedIds = new Map<string, string>()
+    ;(Object.keys(DEPARTMENTS) as Department[]).forEach(dept => {
+      let deptQueue = db.queue.filter(q => q.department === dept)
+      const counters = DEPARTMENTS[dept].counters
+      for (let i = 0; i < counters.length; i++) {
+        const r = assignNextPending(deptQueue, counters)
+        if ('reason' in r) break
+        calls.push({ id: r.called.id, number: r.called.number, counter: r.counter })
+        updatedIds.set(r.called.id, r.counter)
+        deptQueue = deptQueue.map(q => q.id === r.called.id
+          ? { ...q, counter: r.counter, status: 'serving' as const, estimatedWait: 0 }
+          : q
+        )
       }
     })
+    if (calls.length === 0) return
+    updateDB(d => ({
+      ...d,
+      queue: d.queue.map(q => {
+        const counter = updatedIds.get(q.id)
+        return counter ? { ...q, counter, status: 'serving' as const, estimatedWait: 0 } : q
+      }),
+    }))
     showNotif(`Auto-called ${calls.map(c => `${c.number} → ${c.counter}`).join(', ')}`, 'success')
   }, [db.queue, updateDB, showNotif])
 
@@ -134,6 +147,48 @@ export function useQueueDB({ notify: showNotif }: UseQueueDBOptions) {
     const id = setInterval(() => autoCallRef.current(), minutes * 60 * 1000)
     return () => clearInterval(id)
   }, [db.settings.autoCallNext, db.settings.estimatedMinutesPerTransaction])
+
+  const transferTicket = useCallback((id: string, target: Department) => {
+    const origin = db.queue.find(q => q.id === id)
+    if (!origin) return
+    if (origin.status !== 'serving') {
+      showNotif('Only the currently serving ticket can be transferred.', 'warning')
+      return
+    }
+    const tcfg = DEPARTMENTS[target]
+    let maxNum = 0
+    db.queue.forEach(q => {
+      const m = parseInt(q.number.replace(/[A-Z]/g, ''), 10)
+      if (!isNaN(m) && m > maxNum) maxNum = m
+    })
+    idCounter.current += 1
+    const cnt = db.queue.filter(q => q.department === target && (q.status === 'pending' || q.status === 'serving')).length + 1
+    const entry: QueueEntry = {
+      id: 'Q' + Date.now() + '-' + idCounter.current,
+      number: (CONFIG.queuePrefixes[target] || 'X') + String(maxNum + 1).padStart(3, '0'),
+      studentName: origin.studentName,
+      studentId: origin.studentId,
+      service: target,
+      documentType: null,
+      counter: null,
+      status: 'pending',
+      position: cnt,
+      createdAt: new Date().toISOString(),
+      estimatedWait: cnt * 8,
+      department: target,
+      customerType: origin.customerType,
+      source: 'transfer',
+      transferredFrom: origin.number,
+    }
+    updateDB(d => ({
+      ...d,
+      queue: [
+        ...d.queue.map(q => q.id === id ? { ...q, status: 'transferred' as const, counter: null } : q),
+        entry,
+      ],
+    }))
+    showNotif(`${origin.number} passed to ${tcfg.label} as ${entry.number}.`, 'success')
+  }, [db.queue, updateDB, showNotif])
 
   const skip = useCallback((id: string) => {
     updateDB(d => {
@@ -211,6 +266,7 @@ export function useQueueDB({ notify: showNotif }: UseQueueDBOptions) {
     setSettingsForm,
     addToQueue,
     callNext,
+    transferTicket,
     skip,
     done,
     noShow,

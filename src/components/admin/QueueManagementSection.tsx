@@ -1,6 +1,8 @@
 import type { QueueEntry } from '../../types/queue'
+import type { Department } from '../../types/queue'
 import type { QueueStats } from '../../utils/queue'
 import { getServiceLabel } from '../../utils/queue'
+import { DEPARTMENTS } from '../../config'
 
 interface QueueManagementSectionProps {
   active: boolean
@@ -14,6 +16,8 @@ interface QueueManagementSectionProps {
   onSkip: (id: string) => void
   onDone: (id: string) => void
   onNoShow: (id: string) => void
+  transferTargets?: readonly Department[]
+  onTransfer?: (id: string, target: Department) => void
 }
 
 export default function QueueManagementSection({
@@ -28,6 +32,8 @@ export default function QueueManagementSection({
   onSkip,
   onDone,
   onNoShow,
+  transferTargets = [],
+  onTransfer,
 }: QueueManagementSectionProps) {
   const filteredQueue = queue.filter(q => {
     if (q.status.trim().toLowerCase() !== filter) return false
@@ -51,7 +57,7 @@ export default function QueueManagementSection({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
         <div className="table-controls">
           <select value={filter} onChange={e => onFilterChange(e.target.value)}>
-            <option value="pending">Pending</option><option value="serving">Serving</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option>
+            <option value="pending">Pending</option><option value="serving">Serving</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option><option value="transferred">Transferred</option>
           </select>
           <input type="text" placeholder="Search..." value={search} onChange={e => onSearchChange(e.target.value)} />
         </div>
@@ -66,12 +72,20 @@ export default function QueueManagementSection({
                 filteredQueue.map(q => {
                   const t = new Date(q.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
                   return <tr key={q.id}>
-                    <td><strong>{q.number}</strong></td><td>{q.studentName}</td><td>{getServiceLabel(q.service)}</td><td>{q.counter || '—'}</td>
+                    <td><strong>{q.number}</strong></td>
+                    <td>{q.studentName}<span className="meta-chip">{q.customerType}</span>{q.transferredFrom ? <span className="meta-chip from">↳ from {q.transferredFrom}</span> : null}</td>
+                    <td>{getServiceLabel(q.service)}</td><td>{q.counter || '—'}</td>
                     <td><span className={`status-badge ${q.status}`}>{q.status}</span></td>
                     <td style={{ fontSize: 12, color: 'var(--gray-400)' }}>{t}</td>
                     <td><div style={{ display: 'flex', gap: 4 }}>
                       {q.status === 'pending' ? <><button className="action-btn call" onClick={onCallNext}>Call</button><button className="action-btn skip" onClick={() => onSkip(q.id)}>Skip</button></> : ''}
-                      {q.status === 'serving' ? <><button className="action-btn done" onClick={() => onDone(q.id)}>Done</button><button className="action-btn remove" onClick={() => onNoShow(q.id)}>No Show</button></> : ''}
+                      {q.status === 'serving' ? <>
+                        <button className="action-btn done" onClick={() => onDone(q.id)}>Done</button>
+                        {transferTargets.map(target => (
+                          <button key={target} className="action-btn transfer" onClick={() => onTransfer?.(q.id, target)} title={`Pass this customer to the ${DEPARTMENTS[target].label} queue`}>Pass to {DEPARTMENTS[target].label}</button>
+                        ))}
+                        <button className="action-btn remove" onClick={() => onNoShow(q.id)}>No Show</button>
+                      </> : ''}
                     </div></td>
                   </tr>
                 })

@@ -1,5 +1,7 @@
 import { useCallback, useState } from 'react'
-import { ADMIN_CREDENTIALS } from '../config'
+import { ADMIN_ACCOUNTS } from '../config'
+import type { AdminAccount } from '../config'
+import type { Department } from '../types/queue'
 
 export interface UseAdminAuthOptions {
   onNavigate: (screen: string) => void
@@ -7,16 +9,19 @@ export interface UseAdminAuthOptions {
 
 export function useAdminAuth({ onNavigate: showScreen }: UseAdminAuthOptions) {
   const [adminScreen, setAdminScreen] = useState('admin-dashboard')
-  const [, setLoggedIn] = useState(false)
+  const [account, setAccount] = useState<AdminAccount | null>(null)
   const [loginError, setLoginError] = useState(false)
   const [loginUsername, setLoginUsername] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
 
   const handleLogin = useCallback((e: React.FormEvent) => {
     e.preventDefault()
-    if (loginUsername === ADMIN_CREDENTIALS.username && loginPassword === ADMIN_CREDENTIALS.password) {
+    const matched = ADMIN_ACCOUNTS.find(
+      a => a.username === loginUsername && a.password === loginPassword
+    )
+    if (matched) {
       setLoginError(false)
-      setLoggedIn(true)
+      setAccount(matched)
       setAdminScreen('admin-dashboard')
       showScreen('admin-panel')
     } else {
@@ -25,13 +30,15 @@ export function useAdminAuth({ onNavigate: showScreen }: UseAdminAuthOptions) {
   }, [loginUsername, loginPassword, showScreen])
 
   const handleLogout = useCallback(() => {
-    setLoggedIn(false)
+    setAccount(null)
     showScreen('admin-login-screen')
   }, [showScreen])
 
   return {
     adminScreen,
     setAdminScreen,
+    account,
+    department: (account?.department ?? 'registrar') as Department,
     loginError,
     loginUsername,
     loginPassword,

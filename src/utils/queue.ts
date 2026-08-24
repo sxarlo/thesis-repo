@@ -1,8 +1,12 @@
 import { CONFIG } from '../config'
-import type { AssignNextResult, DB, QueueEntry } from '../types/queue'
+import type { AssignNextResult, DB, Department, QueueEntry } from '../types/queue'
 
 export function getServiceLabel(s: string): string {
-  return { 'document-request': 'Document Request', 'claim-document': 'Claim Document', inquiry: 'Inquiry', certification: 'Certification' }[s] ?? s
+  return { 'document-request': 'Document Request', 'claim-document': 'Claim Document', inquiry: 'Inquiry', certification: 'Certification', cashier: 'Cashier Transaction', accounting: 'Accounting Transaction' }[s] ?? s
+}
+
+export function getDepartmentQueue(db: DB, department: Department): QueueEntry[] {
+  return db.queue.filter(q => q.department === department)
 }
 
 export function getDocLabel(t: string | null): string {
@@ -57,13 +61,17 @@ export function getQueueStats(db: DB): QueueStats {
   }
 }
 
-export function assignNextPending(queue: QueueEntry[]): AssignNextResult {
+export function getDepartmentStats(db: DB, department: Department): QueueStats {
+  return getQueueStats({ ...db, queue: getDepartmentQueue(db, department) })
+}
+
+export function assignNextPending(queue: QueueEntry[], counters: readonly string[] = CONFIG.counters.slice(0, 3)): AssignNextResult {
   const next = queue.find(q => q.status === 'pending')
   if (!next) return { reason: 'empty' }
   const occupiedCounters = new Set(
     queue.filter(q => q.status === 'serving' && q.counter).map(q => q.counter as string)
   )
-  const freeCounter = CONFIG.counters.slice(0, 3).find(c => !occupiedCounters.has(c))
+  const freeCounter = counters.find(c => !occupiedCounters.has(c))
   if (!freeCounter) return { reason: 'full' }
   return {
     queue: queue.map(q => q.id === next.id

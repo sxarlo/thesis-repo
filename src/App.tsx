@@ -1,11 +1,13 @@
 import { useCallback, useState } from 'react'
 import './App.css'
+import { ADMIN_ACCOUNTS, DEPARTMENTS } from './config'
+import type { Department } from './types/queue'
 import { useAdminAuth } from './hooks/useAdminAuth'
 import { useClock } from './hooks/useClock'
 import { useNotification } from './hooks/useNotification'
 import { useQueueDB } from './hooks/useQueueDB'
 import { useTransactionForms } from './hooks/useTransactionForms'
-import { getQueueStats } from './utils/queue'
+import { getDepartmentStats } from './utils/queue'
 import AdminLoginScreen from './components/admin/AdminLoginScreen'
 import AdminSidebar from './components/admin/AdminSidebar'
 import AnalyticsSection from './components/admin/AnalyticsSection'
@@ -14,6 +16,8 @@ import DocumentRequestsSection from './components/admin/DocumentRequestsSection'
 import QueueManagementSection from './components/admin/QueueManagementSection'
 import SettingsSection from './components/admin/SettingsSection'
 import ClaimDocumentScreen from './components/kiosk/ClaimDocumentScreen'
+import DepartmentSelectScreen from './components/kiosk/DepartmentSelectScreen'
+import DirectQueueScreen from './components/kiosk/DirectQueueScreen'
 import DocumentRequestScreen from './components/kiosk/DocumentRequestScreen'
 import InquiryScreen from './components/kiosk/InquiryScreen'
 import MapScreen from './components/kiosk/MapScreen'
@@ -39,6 +43,8 @@ function App() {
   const {
     adminScreen,
     setAdminScreen,
+    account,
+    department,
     loginError,
     loginUsername,
     loginPassword,
@@ -53,7 +59,15 @@ function App() {
     setAdminScreen(id)
   }, [handleLogout, setAdminScreen])
 
-  const stats = getQueueStats(queueDB.db)
+  const deptStats = getDepartmentStats(queueDB.db, department)
+  const deptQueue = queueDB.db.queue.filter(q => q.department === department)
+
+  const { transferTicket } = queueDB
+  const handleTransfer = useCallback((id: string, target: Department) => {
+    transferTicket(id, target)
+  }, [transferTicket])
+
+  const isRegistrar = department === 'registrar'
 
   return (
     <div className="app-container">
@@ -64,7 +78,16 @@ function App() {
         timeStr={timeStr}
         dateStr={dateStr}
         onAdminClick={() => showScreen('admin-login-screen')}
-        onStart={() => showScreen('kiosk-services')}
+        onStart={() => showScreen('select-department')}
+      />
+
+      <DepartmentSelectScreen
+        active={screen === 'select-department'}
+        onSelectDepartment={dept => {
+          forms.setLastQueueEntry(null)
+          showScreen(dept === 'registrar' ? 'kiosk-services' : `${dept}-queue`)
+        }}
+        onViewMonitor={dept => showScreen(`monitor-${dept}`)}
       />
 
       <ServicesScreen
@@ -118,11 +141,58 @@ function App() {
         onNavigate={showScreen}
       />
 
+      <DirectQueueScreen
+        active={screen === 'cashier-queue'}
+        department="cashier"
+        entry={forms.lastQueueEntry}
+        name={forms.directName}
+        setName={forms.setDirectName}
+        sid={forms.directSid}
+        setSid={forms.setDirectSid}
+        customerType={forms.directCustomerType}
+        setCustomerType={forms.setDirectCustomerType}
+        onSubmit={e => forms.handleDirectQueue(e, 'cashier')}
+        onBack={() => { forms.setLastQueueEntry(null); showScreen('select-department') }}
+        onTicketReset={() => forms.setLastQueueEntry(null)}
+      />
+
+      <DirectQueueScreen
+        active={screen === 'accounting-queue'}
+        department="accounting"
+        entry={forms.lastQueueEntry}
+        name={forms.directName}
+        setName={forms.setDirectName}
+        sid={forms.directSid}
+        setSid={forms.setDirectSid}
+        customerType={forms.directCustomerType}
+        setCustomerType={forms.setDirectCustomerType}
+        onSubmit={e => forms.handleDirectQueue(e, 'accounting')}
+        onBack={() => { forms.setLastQueueEntry(null); showScreen('select-department') }}
+        onTicketReset={() => forms.setLastQueueEntry(null)}
+      />
+
       <QueueMonitorScreen
-        active={screen === 'queue-monitor'}
+        active={screen === 'monitor-registrar'}
+        department="registrar"
         queue={queueDB.db.queue}
         onCheckStatus={() => showScreen('status-check')}
-        onBack={() => showScreen('kiosk-services')}
+        onBack={() => showScreen('select-department')}
+      />
+
+      <QueueMonitorScreen
+        active={screen === 'monitor-cashier'}
+        department="cashier"
+        queue={queueDB.db.queue}
+        onCheckStatus={() => showScreen('status-check')}
+        onBack={() => showScreen('select-department')}
+      />
+
+      <QueueMonitorScreen
+        active={screen === 'monitor-accounting'}
+        department="accounting"
+        queue={queueDB.db.queue}
+        onCheckStatus={() => showScreen('status-check')}
+        onBack={() => showScreen('select-department')}
       />
 
       <StatusCheckScreen
@@ -154,51 +224,61 @@ function App() {
         <div className="admin-layout">
           <AdminSidebar
             activeScreen={adminScreen}
-            pendingCount={stats.pending}
+            department={department}
+            account={account ?? ADMIN_ACCOUNTS[0]}
+            pendingCount={deptStats.pending}
             onNavigate={handleAdminNav}
             onLogout={handleLogout}
           />
           <main className="admin-main">
             <div className="admin-topbar">
-              <h2>{({ 'admin-dashboard': 'Dashboard', 'admin-queue': 'Queue Management', 'admin-requests': 'Document Requests', 'admin-analytics': 'Analytics', 'admin-settings': 'Settings' } as Record<string, string>)[adminScreen] || 'Dashboard'}</h2>
+              <h2>{({ 'admin-dashboard': `${DEPARTMENTS[department].label} Dashboard`, 'admin-queue': 'Queue Management', 'admin-requests': 'Document Requests', 'admin-analytics': 'Analytics', 'admin-settings': 'Settings' } as Record<string, string>)[adminScreen] || `${DEPARTMENTS[department].label} Dashboard`}</h2>
               <div className="admin-actions"><span className="date">{dateStr}</span><button className="btn btn-secondary" onClick={() => showScreen('kiosk-welcome')}>← Switch to Kiosk</button></div>
             </div>
             <div className="admin-content">
               <DashboardSection
                 active={adminScreen === 'admin-dashboard'}
-                stats={stats}
-                queue={queueDB.db.queue}
+                stats={deptStats}
+                queue={deptQueue}
                 onViewAllPending={() => { setAdminScreen('admin-queue'); setQueueFilter('pending') }}
               />
               <QueueManagementSection
                 active={adminScreen === 'admin-queue'}
-                stats={stats}
-                queue={queueDB.db.queue}
+                stats={deptStats}
+                queue={deptQueue}
                 filter={queueFilter}
                 onFilterChange={setQueueFilter}
                 search={queueSearch}
                 onSearchChange={setQueueSearch}
-                onCallNext={queueDB.callNext}
+                onCallNext={() => queueDB.callNext(department)}
                 onSkip={queueDB.skip}
                 onDone={queueDB.done}
                 onNoShow={queueDB.noShow}
+                transferTargets={DEPARTMENTS[department].transferTargets}
+                onTransfer={handleTransfer}
               />
-              <DocumentRequestsSection
-                active={adminScreen === 'admin-requests'}
-                documents={queueDB.db.documents}
-                onUpdateDocStatus={queueDB.updateDocStatus}
-              />
-              <AnalyticsSection
-                active={adminScreen === 'admin-analytics'}
-                db={queueDB.db}
-              />
-              <SettingsSection
-                active={adminScreen === 'admin-settings'}
-                settingsForm={queueDB.settingsForm}
-                onSettingsFormChange={queueDB.setSettingsForm}
-                onSave={queueDB.saveSettings}
-                onReset={queueDB.resetSystem}
-              />
+              {isRegistrar && (
+                <DocumentRequestsSection
+                  active={adminScreen === 'admin-requests'}
+                  documents={queueDB.db.documents}
+                  onUpdateDocStatus={queueDB.updateDocStatus}
+                />
+              )}
+              {isRegistrar && (
+                <AnalyticsSection
+                  active={adminScreen === 'admin-analytics'}
+                  db={queueDB.db}
+                />
+              )}
+              {isRegistrar && (
+                <SettingsSection
+                  active={adminScreen === 'admin-settings'}
+                  settingsForm={queueDB.settingsForm}
+                  onSettingsFormChange={queueDB.setSettingsForm}
+                  onSave={queueDB.saveSettings}
+                  onReset={queueDB.resetSystem}
+                />
+              )}
             </div>
           </main>
         </div>

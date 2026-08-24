@@ -1,4 +1,10 @@
-export type QueueStatus = 'pending' | 'serving' | 'completed' | 'cancelled'
+export type QueueStatus = 'pending' | 'serving' | 'completed' | 'cancelled' | 'transferred'
+
+export type Department = 'registrar' | 'cashier' | 'accounting'
+
+export type CustomerType = 'student' | 'enrollee' | 'walk-in'
+
+export type TicketSource = 'kiosk' | 'transfer'
 
 export interface QueueEntry {
   id: string
@@ -12,6 +18,17 @@ export interface QueueEntry {
   position: number
   createdAt: string
   estimatedWait: number
+  department: Department
+  customerType: CustomerType
+  source: TicketSource
+  transferredFrom: string | null
+}
+
+export interface AddToQueueOptions {
+  department?: Department
+  customerType?: CustomerType
+  source?: TicketSource
+  transferredFrom?: string | null
 }
 
 export interface DocEntry {

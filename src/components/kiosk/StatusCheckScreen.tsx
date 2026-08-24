@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { DocEntry, QueueEntry } from '../../types/queue'
+import { DEPARTMENTS } from '../../config'
 import { getDocLabel, getServiceLabel } from '../../utils/queue'
 import KioskHeader from './KioskHeader'
 
@@ -43,12 +44,13 @@ export default function StatusCheckScreen({ active, queue, documents, onBack, on
           <div className={`status-result${statusResult !== null ? ' show' : ''}`}>
             {statusResult === null ? null : statusResult ? (
               (() => {
-                const sm: Record<string, { icon: string; label: string; p: number }> = { pending: { icon: '⏳', label: 'In Queue', p: 25 }, serving: { icon: '✅', label: 'Now Serving', p: 60 }, completed: { icon: '🎉', label: 'Completed', p: 100 }, cancelled: { icon: '❌', label: 'Cancelled', p: 0 } }
+                const sm: Record<string, { icon: string; label: string; p: number }> = { pending: { icon: '⏳', label: 'In Queue', p: 25 }, serving: { icon: '✅', label: 'Now Serving', p: 60 }, completed: { icon: '🎉', label: 'Completed', p: 100 }, cancelled: { icon: '❌', label: 'Cancelled', p: 0 }, transferred: { icon: '➡️', label: `Transferred to ${DEPARTMENTS[statusResult.department].label}`, p: 100 } }
                 const st = sm[statusResult.status] || sm.pending
                 const doc = docByQueue(statusResult.id)
                 return <>
                   <div className="status-header"><div style={{ fontSize: 36 }}>{st.icon}</div><div><h3 style={{ fontSize: 18, fontWeight: 700 }}>{st.label}</h3><p style={{ fontSize: 14, color: 'var(--gray-500)' }}>Queue #{statusResult.number}</p></div></div>
                   <div className="status-detail">
+                    <div className="status-detail-item"><div className="label">Department</div><div className="value">{DEPARTMENTS[statusResult.department].label}</div></div>
                     <div className="status-detail-item"><div className="label">Service</div><div className="value">{getServiceLabel(statusResult.service)}</div></div>
                     <div className="status-detail-item"><div className="label">Student</div><div className="value">{statusResult.studentName}</div></div>
                     <div className="status-detail-item"><div className="label">Position</div><div className="value">{statusResult.status === 'pending' ? `#${statusResult.position}` : statusResult.status === 'serving' ? 'Now Serving' : 'Done'}</div></div>

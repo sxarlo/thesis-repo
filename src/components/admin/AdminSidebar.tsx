@@ -1,28 +1,33 @@
-import { ADMIN_CREDENTIALS } from '../../config'
+import { ADMIN_NAV_BY_DEPARTMENT, DEPARTMENTS } from '../../config'
+import type { AdminAccount } from '../../config'
+import type { Department } from '../../types/queue'
 
 interface AdminSidebarProps {
   activeScreen: string
+  department: Department
+  account: AdminAccount
   pendingCount: number
   onNavigate: (id: string) => void
   onLogout: () => void
 }
 
-export default function AdminSidebar({ activeScreen, pendingCount, onNavigate, onLogout }: AdminSidebarProps) {
+export default function AdminSidebar({ activeScreen, department, account, pendingCount, onNavigate, onLogout }: AdminSidebarProps) {
+  const initials = account.name.split(' ').map(p => p[0]).slice(0, 2).join('')
   return (
     <aside className="admin-sidebar">
-      <div className="admin-sidebar-header"><div className="logo-small"><img src="/celp-logo.svg" alt="CEU" /></div><div className="text"><h2>Registrar Admin</h2><span>CEU Malolos</span></div></div>
+      <div className="admin-sidebar-header"><div className="logo-small"><img src="/celp-logo.svg" alt="CEU" /></div><div className="text"><h2>{DEPARTMENTS[department].label} Admin</h2><span>CEU Malolos</span></div></div>
       <nav className="admin-nav">
-        {(['dashboard', 'queue', 'requests', 'analytics', 'settings'] as const).map(item => (
-          <button key={item} className={`admin-nav-item${activeScreen === `admin-${item}` ? ' active' : ''}`} onClick={() => onNavigate(`admin-${item}`)}>
-            <span className="icon">{{ dashboard: '📊', queue: '👥', requests: '📄', analytics: '📈', settings: '⚙️' }[item]}</span>
-            {{ dashboard: 'Dashboard', queue: 'Queue', requests: 'Documents', analytics: 'Analytics', settings: 'Settings' }[item]}
-            {item === 'queue' && pendingCount > 0 && <span className="badge">{pendingCount}</span>}
+        {ADMIN_NAV_BY_DEPARTMENT[department].map(item => (
+          <button key={item.id} className={`admin-nav-item${activeScreen === `admin-${item.id}` ? ' active' : ''}`} onClick={() => onNavigate(`admin-${item.id}`)}>
+            <span className="icon">{item.icon}</span>
+            {item.label}
+            {item.id === 'queue' && pendingCount > 0 && <span className="badge">{pendingCount}</span>}
           </button>
         ))}
       </nav>
       <div className="admin-sidebar-footer">
-        <div className="avatar">JD</div>
-        <div className="info"><div className="name">{ADMIN_CREDENTIALS.name}</div><div className="role">{ADMIN_CREDENTIALS.role}</div></div>
+        <div className="avatar">{initials}</div>
+        <div className="info"><div className="name">{account.name}</div><div className="role">{account.role}</div></div>
         <button className="logout-btn" onClick={onLogout} title="Logout">🚪</button>
       </div>
     </aside>

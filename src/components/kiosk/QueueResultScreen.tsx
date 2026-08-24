@@ -33,7 +33,7 @@ export default function QueueResultScreen({ active, entry, onNavigate }: QueueRe
           </div>
           <div className="queue-actions">
             <button className="btn btn-secondary btn-lg" onClick={() => onNavigate('status-check')}>🔍 Track</button>
-            <button className="btn btn-secondary btn-lg" onClick={() => onNavigate('queue-monitor')}>👥 Queue</button>
+            <button className="btn btn-secondary btn-lg" onClick={() => onNavigate(`monitor-${entry.department}`)}>👥 Queue</button>
             <button className="btn btn-secondary btn-lg" onClick={() => onNavigate('interactive-map')}>📍 Map</button>
             <button className="btn btn-primary btn-lg" onClick={() => onNavigate('kiosk-services')}>← New Transaction</button>
           </div>

@@ -13,12 +13,20 @@ export function getDefaultDB(): DB {
 export function normalizeStatus(st: string | null | undefined): QueueStatus {
   const v = (st || '').trim().toLowerCase()
   if (v === 'serving' || v === 'completed') return v
+  if (v === 'transferred') return 'transferred'
   if (v === 'cancelled' || v === 'canceled' || v === 'skip' || v === 'skipped' || v === 'noshow' || v === 'no-show' || v === 'no show') return 'cancelled'
   return 'pending'
 }
 
 export function normalizeDB(raw: DB): DB {
-  const queue = (raw.queue || []).map(q => ({ ...q, status: normalizeStatus(q.status) }))
+  const queue = (raw.queue || []).map(q => ({
+    ...q,
+    status: normalizeStatus(q.status),
+    department: q.department ?? 'registrar',
+    customerType: q.customerType ?? 'student',
+    source: q.source ?? 'kiosk',
+    transferredFrom: q.transferredFrom ?? null,
+  }))
   const cancelledIds = new Set(queue.filter(q => q.status === 'cancelled').map(q => q.id))
   const documents = (raw.documents || []).map(doc => cancelledIds.has(doc.queueId) && doc.status !== 'cancelled'
     ? { ...doc, status: 'cancelled', updatedAt: new Date().toISOString() }
