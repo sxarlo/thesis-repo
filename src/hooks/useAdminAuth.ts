@@ -13,6 +13,7 @@ export function useAdminAuth({ onNavigate: showScreen }: UseAdminAuthOptions) {
   const [loginError, setLoginError] = useState(false)
   const [loginUsername, setLoginUsername] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleLogin = useCallback((e: React.FormEvent) => {
     e.preventDefault()
@@ -40,10 +41,13 @@ export function useAdminAuth({ onNavigate: showScreen }: UseAdminAuthOptions) {
     account,
     department: (account?.department ?? 'registrar') as Department,
     loginError,
+    setLoginError,
     loginUsername,
     loginPassword,
     setLoginUsername,
     setLoginPassword,
+    showPassword,
+    setShowPassword,
     handleLogin,
     handleLogout,
   }

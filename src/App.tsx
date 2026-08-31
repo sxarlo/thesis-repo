@@ -1,9 +1,11 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import './App.css'
 import { ADMIN_ACCOUNTS, DEPARTMENTS } from './config'
 import type { Department } from './types/queue'
 import { useAdminAuth } from './hooks/useAdminAuth'
 import { useClock } from './hooks/useClock'
+import { useHiddenAdminGesture } from './hooks/useHiddenAdminGesture'
+import { useKioskHistory } from './hooks/useKioskHistory'
 import { useNotification } from './hooks/useNotification'
 import { useQueueDB } from './hooks/useQueueDB'
 import { useTransactionForms } from './hooks/useTransactionForms'
@@ -36,6 +38,13 @@ function App() {
     setScreen(id)
   }, [])
 
+  useKioskHistory(screen, showScreen)
+
+  useHiddenAdminGesture({
+    enabled: screen === 'select-department',
+    onTrigger: () => showScreen('admin-login-screen'),
+  })
+
   const { notification, showNotif } = useNotification()
   const { timeStr, dateStr } = useClock()
   const queueDB = useQueueDB({ notify: showNotif })
@@ -46,13 +55,24 @@ function App() {
     account,
     department,
     loginError,
+    setLoginError,
     loginUsername,
     loginPassword,
     setLoginUsername,
     setLoginPassword,
+    showPassword,
+    setShowPassword,
     handleLogin,
     handleLogout,
   } = useAdminAuth({ onNavigate: showScreen })
+
+  useEffect(() => {
+    if (screen !== 'admin-login-screen') return
+    setLoginUsername('')
+    setLoginPassword('')
+    setShowPassword(false)
+    setLoginError(false)
+  }, [screen, setLoginUsername, setLoginPassword, setShowPassword, setLoginError])
 
   const handleAdminNav = useCallback((id: string) => {
     if (id === 'admin-logout') { handleLogout(); return }
@@ -216,6 +236,8 @@ function App() {
         password={loginPassword}
         onUsernameChange={setLoginUsername}
         onPasswordChange={setLoginPassword}
+        showPassword={showPassword}
+        onShowPasswordChange={setShowPassword}
         onSubmit={handleLogin}
         onBack={() => showScreen('kiosk-welcome')}
       />

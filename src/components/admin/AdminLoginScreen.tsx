@@ -5,6 +5,8 @@ interface AdminLoginScreenProps {
   password: string
   onUsernameChange: (value: string) => void
   onPasswordChange: (value: string) => void
+  showPassword: boolean
+  onShowPasswordChange: (checked: boolean) => void
   onSubmit: (e: React.FormEvent) => void
   onBack: () => void
 }
@@ -16,6 +18,8 @@ export default function AdminLoginScreen({
   password,
   onUsernameChange,
   onPasswordChange,
+  showPassword,
+  onShowPasswordChange,
   onSubmit,
   onBack,
 }: AdminLoginScreenProps) {
@@ -27,7 +31,11 @@ export default function AdminLoginScreen({
           <form onSubmit={onSubmit}>
             <div className={`login-error${loginError ? ' show' : ''}`}>Invalid username or password.</div>
             <div className="form-group"><label>Username</label><input type="text" placeholder="Enter admin username" required value={username} onChange={e => onUsernameChange(e.target.value)} /></div>
-            <div className="form-group"><label>Password</label><input type="password" placeholder="Enter your password" required value={password} onChange={e => onPasswordChange(e.target.value)} /></div>
+            <div className="form-group"><label>Password</label><input type={showPassword ? 'text' : 'password'} placeholder="Enter your password" required value={password} onChange={e => onPasswordChange(e.target.value)} /></div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--gray-600)', cursor: 'pointer', marginBottom: 14, userSelect: 'none' }}>
+              <input type="checkbox" checked={showPassword} onChange={e => onShowPasswordChange(e.target.checked)} />
+              Show password
+            </label>
             <button type="submit" className="btn btn-primary btn-block btn-lg">Sign In</button>
             <div style={{ marginTop: 14, padding: '10px 12px', background: 'var(--gray-50)', borderRadius: 8, fontSize: 12, color: 'var(--gray-500)', lineHeight: 1.7 }}>
               <strong style={{ color: 'var(--gray-600)' }}>Demo accounts:</strong><br />
