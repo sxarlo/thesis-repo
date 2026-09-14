@@ -30,7 +30,7 @@ export const CONFIG = {
 
 export const DEPARTMENTS: Record<Department, { id: Department; label: string; icon: string; counters: string[]; transferTargets: Department[] }> = {
   registrar: { id: 'registrar', label: 'Registrar', icon: '📄', counters: CONFIG.counters.slice(0, 3), transferTargets: ['cashier', 'accounting'] },
-  cashier: { id: 'cashier', label: 'Cashier', icon: '💰', counters: ['Cashier Counter 1', 'Cashier Counter 2'], transferTargets: ['accounting'] },
+  cashier: { id: 'cashier', label: 'Cashier', icon: '💰', counters: ['Cashier Counter 1', 'Cashier Counter 2'], transferTargets: [] },
   accounting: { id: 'accounting', label: 'Accounting', icon: '🧾', counters: ['Accounting Counter 1', 'Accounting Counter 2'], transferTargets: [] },
 }
 

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import './App.css'
-import { ADMIN_ACCOUNTS, DEPARTMENTS } from './config'
-import type { Department } from './types/queue'
+import { ADMIN_ACCOUNTS } from './config'
 import { useAdminAuth } from './hooks/useAdminAuth'
 import { useClock } from './hooks/useClock'
 import { useHiddenAdminGesture } from './hooks/useHiddenAdminGesture'
@@ -9,14 +8,8 @@ import { useKioskHistory } from './hooks/useKioskHistory'
 import { useNotification } from './hooks/useNotification'
 import { useQueueDB } from './hooks/useQueueDB'
 import { useTransactionForms } from './hooks/useTransactionForms'
-import { getDepartmentStats } from './utils/queue'
 import AdminLoginScreen from './components/admin/AdminLoginScreen'
-import AdminSidebar from './components/admin/AdminSidebar'
-import AnalyticsSection from './components/admin/AnalyticsSection'
-import DashboardSection from './components/admin/DashboardSection'
-import DocumentRequestsSection from './components/admin/DocumentRequestsSection'
-import QueueManagementSection from './components/admin/QueueManagementSection'
-import SettingsSection from './components/admin/SettingsSection'
+import AdminPanel from './components/admin/AdminPanel'
 import ClaimDocumentScreen from './components/kiosk/ClaimDocumentScreen'
 import DepartmentSelectScreen from './components/kiosk/DepartmentSelectScreen'
 import DirectQueueScreen from './components/kiosk/DirectQueueScreen'
@@ -31,8 +24,6 @@ import WelcomeScreen from './components/kiosk/WelcomeScreen'
 
 function App() {
   const [screen, setScreen] = useState('kiosk-welcome')
-  const [queueFilter, setQueueFilter] = useState('pending')
-  const [queueSearch, setQueueSearch] = useState('')
 
   const showScreen = useCallback((id: string) => {
     setScreen(id)
@@ -74,25 +65,11 @@ function App() {
     setLoginError(false)
   }, [screen, setLoginUsername, setLoginPassword, setShowPassword, setLoginError])
 
-  const handleAdminNav = useCallback((id: string) => {
-    if (id === 'admin-logout') { handleLogout(); return }
-    setAdminScreen(id)
-  }, [handleLogout, setAdminScreen])
-
-  const deptStats = getDepartmentStats(queueDB.db, department)
-  const deptQueue = queueDB.db.queue.filter(q => q.department === department)
-
-  const { transferTicket } = queueDB
-  const handleTransfer = useCallback((id: string, target: Department) => {
-    transferTicket(id, target)
-  }, [transferTicket])
-
-  const isRegistrar = department === 'registrar'
-
   return (
     <div className="app-container">
       {notification && <div className={`notification ${notification.type}`}>{notification.msg}</div>}
 
+      {/* ---- KIOSK SCREENS ---- */}
       <WelcomeScreen
         active={screen === 'kiosk-welcome'}
         timeStr={timeStr}
@@ -229,6 +206,7 @@ function App() {
         onBack={() => showScreen('kiosk-services')}
       />
 
+      {/* ---- ADMIN ---- */}
       <AdminLoginScreen
         active={screen === 'admin-login-screen'}
         loginError={loginError}
@@ -242,69 +220,17 @@ function App() {
         onBack={() => showScreen('kiosk-welcome')}
       />
 
-      <div className={`screen${screen === 'admin-panel' ? ' active' : ''}`}>
-        <div className="admin-layout">
-          <AdminSidebar
-            activeScreen={adminScreen}
-            department={department}
-            account={account ?? ADMIN_ACCOUNTS[0]}
-            pendingCount={deptStats.pending}
-            onNavigate={handleAdminNav}
-            onLogout={handleLogout}
-          />
-          <main className="admin-main">
-            <div className="admin-topbar">
-              <h2>{({ 'admin-dashboard': `${DEPARTMENTS[department].label} Dashboard`, 'admin-queue': 'Queue Management', 'admin-requests': 'Document Requests', 'admin-analytics': 'Analytics', 'admin-settings': 'Settings' } as Record<string, string>)[adminScreen] || `${DEPARTMENTS[department].label} Dashboard`}</h2>
-              <div className="admin-actions"><span className="date">{dateStr}</span><button className="btn btn-secondary" onClick={() => showScreen('kiosk-welcome')}>← Switch to Kiosk</button></div>
-            </div>
-            <div className="admin-content">
-              <DashboardSection
-                active={adminScreen === 'admin-dashboard'}
-                stats={deptStats}
-                queue={deptQueue}
-                onViewAllPending={() => { setAdminScreen('admin-queue'); setQueueFilter('pending') }}
-              />
-              <QueueManagementSection
-                active={adminScreen === 'admin-queue'}
-                stats={deptStats}
-                queue={deptQueue}
-                filter={queueFilter}
-                onFilterChange={setQueueFilter}
-                search={queueSearch}
-                onSearchChange={setQueueSearch}
-                onCallNext={() => queueDB.callNext(department)}
-                onSkip={queueDB.skip}
-                onDone={queueDB.done}
-                onNoShow={queueDB.noShow}
-                transferTargets={DEPARTMENTS[department].transferTargets}
-                onTransfer={handleTransfer}
-              />
-              {isRegistrar && (
-                <DocumentRequestsSection
-                  active={adminScreen === 'admin-requests'}
-                  documents={queueDB.db.documents}
-                  onUpdateDocStatus={queueDB.updateDocStatus}
-                />
-              )}
-              {isRegistrar && (
-                <AnalyticsSection
-                  active={adminScreen === 'admin-analytics'}
-                  db={queueDB.db}
-                />
-              )}
-              {isRegistrar && (
-                <SettingsSection
-                  active={adminScreen === 'admin-settings'}
-                  settingsForm={queueDB.settingsForm}
-                  onSettingsFormChange={queueDB.setSettingsForm}
-                  onSave={queueDB.saveSettings}
-                  onReset={queueDB.resetSystem}
-                />
-              )}
-            </div>
-          </main>
-        </div>
-      </div>
+      <AdminPanel
+        active={screen === 'admin-panel'}
+        adminScreen={adminScreen}
+        setAdminScreen={setAdminScreen}
+        account={account ?? ADMIN_ACCOUNTS[0]}
+        department={department}
+        queueDB={queueDB}
+        onLogout={handleLogout}
+        onSwitchToKiosk={() => showScreen('kiosk-welcome')}
+        dateStr={dateStr}
+      />
     </div>
   )
 }

@@ -155,6 +155,10 @@ export function useQueueDB({ notify: showNotif }: UseQueueDBOptions) {
       showNotif('Only the currently serving ticket can be transferred.', 'warning')
       return
     }
+    if (origin.department !== 'registrar') {
+      showNotif('Only Registrar can transfer tickets.', 'warning')
+      return
+    }
     const tcfg = DEPARTMENTS[target]
     let maxNum = 0
     db.queue.forEach(q => {
