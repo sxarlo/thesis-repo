@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react'
 import type { AddToQueueOptions, CustomerType, Department, QueueEntry } from '../types/queue'
 
 export interface UseTransactionFormsOptions {
-  addToQueue: (name: string, sid: string, svc: string, docType: string | null, opts?: AddToQueueOptions) => QueueEntry
+  addToQueue: (name: string, sid: string, svc: string, docType: string | null, opts?: AddToQueueOptions) => Promise<QueueEntry>
   notify: (msg: string, type?: string) => void
 }
 
@@ -20,37 +20,37 @@ export function useTransactionForms({ addToQueue, notify: showNotif }: UseTransa
   const [directCustomerType, setDirectCustomerType] = useState<CustomerType>('walk-in')
   const [lastQueueEntry, setLastQueueEntry] = useState<QueueEntry | null>(null)
 
-  const handleDocRequest = useCallback((e: React.FormEvent) => {
+  const handleDocRequest = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!reqName || !reqDocType) { showNotif('Please fill all required fields.', 'info'); return }
-    const entry = addToQueue(reqName, '', 'document-request', reqDocType)
+    const entry = await addToQueue(reqName, '', 'document-request', reqDocType)
     setLastQueueEntry(entry)
     setReqName(''); setReqDocType(''); setReqPurpose(''); setReqCopies(1)
     showNotif(`Queue #${entry.number} assigned!`, 'success')
   }, [reqName, reqDocType, addToQueue, showNotif])
 
-  const handleClaim = useCallback((e: React.FormEvent) => {
+  const handleClaim = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!claimName) { showNotif('Please fill in your name.', 'info'); return }
-    const entry = addToQueue(claimName, '', 'claim-document', claimDocType || null)
+    const entry = await addToQueue(claimName, '', 'claim-document', claimDocType || null)
     setLastQueueEntry(entry)
     setClaimName(''); setClaimDocType('')
     showNotif(`Queue #${entry.number} assigned!`, 'success')
   }, [claimName, claimDocType, addToQueue, showNotif])
 
-  const handleInquiry = useCallback((e: React.FormEvent) => {
+  const handleInquiry = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!inquiryName || !inquiryMsg) { showNotif('Please fill all fields.', 'info'); return }
-    const entry = addToQueue(inquiryName, '', 'inquiry', null)
+    const entry = await addToQueue(inquiryName, '', 'inquiry', null)
     setLastQueueEntry(entry)
     setInquiryName(''); setInquiryMsg('')
     showNotif(`Queue #${entry.number} assigned!`, 'success')
   }, [inquiryName, inquiryMsg, addToQueue, showNotif])
 
-  const handleDirectQueue = useCallback((e: React.FormEvent, department: Department) => {
+  const handleDirectQueue = useCallback(async (e: React.FormEvent, department: Department) => {
     e.preventDefault()
     if (!directName) { showNotif('Please fill in your name.', 'info'); return }
-    const entry = addToQueue(directName, directSid, department, null, {
+    const entry = await addToQueue(directName, directSid, department, null, {
       department,
       customerType: directCustomerType,
       source: 'kiosk',

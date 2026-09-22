@@ -1,18 +1,18 @@
 import { ADMIN_NAV_BY_DEPARTMENT, DEPARTMENTS } from '../../config'
-import type { AdminAccount } from '../../config'
+import type { AdminProfile } from '../../types/admin'
 import type { Department } from '../../types/queue'
 
 interface AdminSidebarProps {
   activeScreen: string
   department: Department
-  account: AdminAccount
+  account: AdminProfile
   pendingCount: number
   onNavigate: (id: string) => void
-  onLogout: () => void
+  onRequestLogout: () => void
 }
 
-export default function AdminSidebar({ activeScreen, department, account, pendingCount, onNavigate, onLogout }: AdminSidebarProps) {
-  const initials = account.name.split(' ').map(p => p[0]).slice(0, 2).join('')
+export default function AdminSidebar({ activeScreen, department, account, pendingCount, onNavigate, onRequestLogout }: AdminSidebarProps) {
+  const initials = account.display_name.split(' ').map(p => p[0]).slice(0, 2).join('')
   return (
     <aside className="admin-sidebar">
       <div className="admin-sidebar-header"><div className="logo-small"><img src="/celp-logo.svg" alt="CEU" /></div><div className="text"><h2>{DEPARTMENTS[department].label} Admin</h2><span>CEU Malolos</span></div></div>
@@ -27,8 +27,8 @@ export default function AdminSidebar({ activeScreen, department, account, pendin
       </nav>
       <div className="admin-sidebar-footer">
         <div className="avatar">{initials}</div>
-        <div className="info"><div className="name">{account.name}</div><div className="role">{account.role}</div></div>
-        <button className="logout-btn" onClick={onLogout} title="Logout">🚪</button>
+        <div className="info"><div className="name">{account.display_name}</div><div className="role">{account.role}</div></div>
+        <button className="logout-btn" onClick={onRequestLogout} title="Logout">🚪</button>
       </div>
     </aside>
   )

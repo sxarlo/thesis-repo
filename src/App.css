@@ -1409,3 +1409,66 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ---- Logout Confirmation Dialog ---- */
+.logout-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.15s ease;
+}
+.logout-confirm-dialog {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xl);
+  padding: 32px;
+  max-width: 380px;
+  width: 90%;
+  text-align: center;
+}
+.logout-confirm-dialog h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  color: var(--gray-800);
+}
+.logout-confirm-dialog p {
+  margin: 0 0 24px;
+  font-size: 14px;
+  color: var(--gray-500);
+}
+.logout-confirm-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+.logout-confirm-actions button {
+  padding: 10px 24px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s, opacity 0.2s;
+}
+.logout-confirm-actions .btn-cancel {
+  background: var(--gray-100);
+  color: var(--gray-700);
+}
+.logout-confirm-actions .btn-cancel:hover {
+  background: var(--gray-200);
+}
+.logout-confirm-actions .btn-confirm-logout {
+  background: var(--danger);
+  color: var(--white);
+}
+.logout-confirm-actions .btn-confirm-logout:hover {
+  background: #c82333;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

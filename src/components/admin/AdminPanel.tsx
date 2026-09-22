@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { DEPARTMENTS } from '../../config'
-import type { AdminAccount } from '../../config'
+import type { AdminProfile } from '../../types/admin'
 import type { Department } from '../../types/queue'
 import type { DB, SettingsForm } from '../../types/queue'
 import { getDepartmentStats } from '../../utils/queue'
@@ -15,12 +15,12 @@ interface QueueDB {
   db: DB
   settingsForm: SettingsForm
   setSettingsForm: React.Dispatch<React.SetStateAction<SettingsForm>>
-  callNext: (department: Department) => void
-  skip: (id: string) => void
-  done: (id: string) => void
-  noShow: (id: string) => void
-  transferTicket: (id: string, target: Department) => void
-  updateDocStatus: (docId: string, status: string) => void
+  callNext: (department: Department) => void | Promise<void>
+  skip: (id: string) => void | Promise<void>
+  done: (id: string) => void | Promise<void>
+  noShow: (id: string) => void | Promise<void>
+  transferTicket: (id: string, target: Department) => void | Promise<void>
+  updateDocStatus: (docId: string, status: string) => void | Promise<void>
   saveSettings: () => void
   resetSystem: () => void
 }
@@ -29,10 +29,10 @@ interface AdminPanelProps {
   active: boolean
   adminScreen: string
   setAdminScreen: (screen: string) => void
-  account: AdminAccount
+  account: AdminProfile
   department: Department
   queueDB: QueueDB
-  onLogout: () => void
+  onRequestLogout: () => void
   onSwitchToKiosk: () => void
   dateStr: string
 }
@@ -44,7 +44,7 @@ export default function AdminPanel({
   account,
   department,
   queueDB,
-  onLogout,
+  onRequestLogout,
   onSwitchToKiosk,
   dateStr,
 }: AdminPanelProps) {
@@ -56,9 +56,8 @@ export default function AdminPanel({
   const isRegistrar = department === 'registrar'
 
   const handleAdminNav = useCallback((id: string) => {
-    if (id === 'admin-logout') { onLogout(); return }
     setAdminScreen(id)
-  }, [onLogout, setAdminScreen])
+  }, [setAdminScreen])
 
   const handleTransfer = useCallback((id: string, target: Department) => {
     queueDB.transferTicket(id, target)
@@ -81,7 +80,7 @@ export default function AdminPanel({
           account={account}
           pendingCount={deptStats.pending}
           onNavigate={handleAdminNav}
-          onLogout={onLogout}
+          onRequestLogout={onRequestLogout}
         />
         <main className="admin-main">
           <div className="admin-topbar">
