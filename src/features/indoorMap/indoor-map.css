@@ -1,0 +1,292 @@
+/*
+ * Scoped port of the reference "Campus Map & Wayfinder" stylesheet.
+ * Every rule is prefixed with `.im-root` so the bare element selectors used by
+ * the original document (`button`, `label`, `select`, `svg`, `text`) cannot
+ * leak into the rest of the kiosk UI. Values are unchanged from the source.
+ */
+.im-root {
+  color-scheme: light;
+  --im-bg: #fff6f8;
+  --im-ink: #3a2430;
+  --im-mut: #8a6b78;
+  --im-card: #fffafb;
+  --im-line: #f4c9d6;
+  --im-path: #d6336c;
+  --im-acc: #e8638f;
+  max-width: 1180px;
+  margin: 0 auto;
+  width: 100%;
+  color: var(--im-ink);
+  font: 17px/1.55 "Segoe UI", system-ui, sans-serif;
+}
+
+.im-root .im-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: end;
+  background: var(--im-card);
+  border: 1px solid var(--im-line);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.im-root label {
+  display: flex;
+  flex-direction: column;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--im-ink);
+  gap: 5px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.im-root .im-fake-input {
+  padding: 13px 14px;
+  border-radius: 12px;
+  border: 2px solid var(--im-line);
+  background: var(--im-bg);
+  font-weight: 700;
+}
+
+.im-root select,
+.im-root button {
+  font: inherit;
+  padding: 13px 14px;
+  border-radius: 12px;
+  border: 2px solid var(--im-line);
+  background: var(--im-bg);
+  color: var(--im-ink);
+}
+
+.im-root select {
+  font-size: 16px;
+}
+
+.im-root button {
+  cursor: pointer;
+  background: var(--im-acc);
+  color: #fff;
+  border-color: var(--im-acc);
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.im-root button.im-sec {
+  background: transparent;
+  color: var(--im-ink);
+  border-color: var(--im-line);
+  font-weight: 600;
+}
+
+.im-root .im-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+
+.im-root .im-chip {
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: 2px solid var(--im-line);
+  background: var(--im-card);
+  color: var(--im-ink);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.im-root .im-chip:hover {
+  border-color: var(--im-acc);
+}
+
+.im-root .im-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.im-root .im-tabs button {
+  background: var(--im-card);
+  color: var(--im-ink);
+  border-color: var(--im-line);
+  flex: 1;
+  padding: 12px 10px;
+  font-size: 16px;
+}
+
+.im-root .im-tabs button[aria-pressed="true"] {
+  background: var(--im-acc);
+  color: #fff;
+  border-color: var(--im-acc);
+}
+
+.im-root :focus-visible {
+  outline: 3px solid var(--im-path);
+  outline-offset: 2px;
+}
+
+.im-root .im-wrap {
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid var(--im-line);
+  border-radius: 14px;
+}
+
+.im-root svg {
+  display: block;
+  width: 100%;
+  min-width: 760px;
+  height: auto;
+}
+
+.im-root .im-room {
+  cursor: pointer;
+  stroke: #1d2433;
+  stroke-width: 1.2;
+}
+
+.im-root .im-room:hover {
+  filter: brightness(1.1);
+}
+
+.im-root .im-room.sel {
+  stroke: #d6336c;
+  stroke-width: 4;
+}
+
+.im-root text {
+  font-family: "Segoe UI", Arial, sans-serif;
+  fill: #111;
+  text-anchor: middle;
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: rgba(255, 255, 255, 0.8);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.im-root .im-box {
+  fill: #fff;
+  stroke: #1d2433;
+  stroke-width: 1.2;
+}
+
+.im-root .im-tag {
+  font-size: 13px;
+  font-weight: 700;
+  fill: #1d2433;
+}
+
+.im-root .im-route {
+  fill: none;
+  stroke: #d6336c;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 14 10;
+  animation: imDash 1s linear infinite;
+}
+
+@keyframes imDash {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .im-root .im-route {
+    animation: none;
+  }
+}
+
+.im-root .im-pin {
+  stroke: #fff;
+  stroke-width: 3;
+}
+
+.im-root .im-out {
+  background: var(--im-card);
+  border: 1px solid var(--im-line);
+  border-radius: 14px;
+  padding: 18px;
+  margin-top: 14px;
+}
+
+.im-root .im-out b {
+  font-size: 18px;
+}
+
+/* Restores the default <p> spacing the standalone document relied on
+   (the kiosk global reset sets `* { margin: 0 }`). */
+.im-root .im-out p {
+  margin: 1em 0;
+}
+
+.im-root .im-out ol {
+  margin: 10px 0 0;
+  padding-left: 24px;
+  font-size: 16px;
+}
+
+.im-root .im-out li {
+  margin-bottom: 10px;
+}
+
+.im-root .im-stat {
+  color: var(--im-mut);
+  font-size: 14px;
+}
+
+.im-root .im-legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  color: var(--im-mut);
+  margin-top: 10px;
+}
+
+.im-root .im-legend i {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  margin-right: 5px;
+  vertical-align: -1px;
+}
+
+.im-root .im-stepbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.im-root .im-stepbar button {
+  padding: 10px 16px;
+}
+
+.im-root .im-stepdot {
+  flex: 1;
+  text-align: center;
+  font-weight: 700;
+  color: var(--im-mut);
+}
+
+.im-root .im-curstep {
+  background: rgba(232, 99, 143, 0.1);
+  border: 2px solid var(--im-acc);
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 17px;
+}
+
+@media (max-width: 600px) {
+  .im-root label {
+    min-width: 100%;
+  }
+}

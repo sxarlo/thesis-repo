@@ -7,9 +7,34 @@ export interface UseAdminAuthOptions {
   onNavigate: (screen: string) => void
 }
 
+const PROFILE_COLUMNS = 'id, email, username, display_name, role, department, is_active'
+
+interface ProfileRow {
+  id: string
+  email: string
+  username: string
+  display_name: string
+  role: string
+  department: string
+  is_active: boolean
+}
+
+function toProfile(row: ProfileRow): AdminProfile {
+  return {
+    id: row.id,
+    email: row.email,
+    username: row.username,
+    display_name: row.display_name,
+    role: row.role,
+    department: row.department as Department,
+    is_active: row.is_active,
+  }
+}
+
 export function useAdminAuth({ onNavigate: showScreen }: UseAdminAuthOptions) {
   const [adminScreen, setAdminScreen] = useState('admin-dashboard')
   const [account, setAccount] = useState<AdminProfile | null>(null)
+  const [sessionReady, setSessionReady] = useState(false)
   const [loginError, setLoginError] = useState(false)
   const [loginUsername, setLoginUsername] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
@@ -33,6 +58,48 @@ export function useAdminAuth({ onNavigate: showScreen }: UseAdminAuthOptions) {
     return () => subscription.unsubscribe()
   }, [showScreen])
 
+  // Restore admin identity from an existing session (survives page refresh).
+  // The profile is re-read from admin_profiles for the session user; if it is
+  // missing or deactivated, the session is revoked and account stays null.
+  useEffect(() => {
+    let cancelled = false
+
+    async function restoreSession() {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (cancelled || !session) return
+
+        const { data: profile, error } = await supabase
+          .from('admin_profiles')
+          .select(PROFILE_COLUMNS)
+          .eq('id', session.user.id)
+          .maybeSingle()
+
+        if (cancelled) return
+
+        if (error) {
+          // Could not verify the profile (e.g. transient failure): deny the
+          // admin UI for this load without destroying a valid session.
+          setAccount(null)
+        } else if (!profile || !profile.is_active) {
+          // Profile missing or deactivated: revoke the session entirely.
+          await supabase.auth.signOut()
+          setAccount(null)
+        } else {
+          setAccount(toProfile(profile))
+          setAdminScreen('admin-dashboard')
+        }
+      } catch {
+        if (!cancelled) setAccount(null)
+      } finally {
+        if (!cancelled) setSessionReady(true)
+      }
+    }
+
+    restoreSession()
+    return () => { cancelled = true }
+  }, [])
+
   const handleLogin = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     setLoginError(false)
@@ -43,10 +110,11 @@ export function useAdminAuth({ onNavigate: showScreen }: UseAdminAuthOptions) {
       // Clear any stale session before logging in
       await supabase.auth.signOut()
 
-      // Step 1: Look up admin profile by username to get email
+      // Step 1: Look up admin profile by username to get email (anon — runs
+      // before sign-in; requires the anon SELECT policy on admin_profiles)
       const { data: profile, error: profileError } = await supabase
         .from('admin_profiles')
-        .select('id, email, username, display_name, role, department')
+        .select(PROFILE_COLUMNS)
         .eq('username', loginUsername)
         .eq('is_active', true)
         .single()
@@ -68,14 +136,7 @@ export function useAdminAuth({ onNavigate: showScreen }: UseAdminAuthOptions) {
       }
 
       // Step 3: Store the admin profile
-      setAccount({
-        id: profile.id,
-        email: profile.email,
-        username: profile.username,
-        display_name: profile.display_name,
-        role: profile.role,
-        department: profile.department as Department,
-      })
+      setAccount(toProfile(profile))
       setAdminScreen('admin-dashboard')
       showScreen('admin-panel')
     } catch {
@@ -104,7 +165,7 @@ export function useAdminAuth({ onNavigate: showScreen }: UseAdminAuthOptions) {
     adminScreen,
     setAdminScreen,
     account,
-    department: (account?.department ?? 'registrar') as Department,
+    sessionReady,
     loginError,
     setLoginError,
     loginUsername,

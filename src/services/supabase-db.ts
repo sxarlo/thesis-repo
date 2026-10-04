@@ -197,15 +197,14 @@ export async function updateDocumentStatus(id: string, status: string): Promise<
   return null
 }
 
-// ─── DELETE ───────────────────────────────────────────────────────────────────
+// ─── RESET (server-side) ─────────────────────────────────────────────────────
 
-export async function deleteAllTickets(): Promise<string | null> {
-  const { error } = await supabase.from('tickets').delete().neq('id', '')
-  return error ? error.message : null
-}
-
-export async function deleteAllDocuments(): Promise<string | null> {
-  const { error } = await supabase.from('documents').delete().neq('id', '')
+// Direct DELETE on tickets/documents is revoked for anon and authenticated in
+// phase1-rbac-hardening.sql. Reset goes through the SECURITY DEFINER RPC
+// public.reset_queue_system(), which only proceeds for an authenticated,
+// active registrar admin.
+export async function resetQueueSystem(): Promise<string | null> {
+  const { error } = await supabase.rpc('reset_queue_system')
   return error ? error.message : null
 }
 

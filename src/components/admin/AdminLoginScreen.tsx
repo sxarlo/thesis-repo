@@ -37,12 +37,6 @@ export default function AdminLoginScreen({
               Show password
             </label>
             <button type="submit" className="btn btn-primary btn-block btn-lg">Sign In</button>
-            <div style={{ marginTop: 14, padding: '10px 12px', background: 'var(--gray-50)', borderRadius: 8, fontSize: 12, color: 'var(--gray-500)', lineHeight: 1.7 }}>
-              <strong style={{ color: 'var(--gray-600)' }}>Demo accounts:</strong><br />
-              Registrar — admin / admin123<br />
-              Cashier — cashier / cashier123<br />
-              Accounting — accounting / acctg123
-            </div>
             <div className="text-center mt-16"><button type="button" className="btn btn-secondary" onClick={onBack}>← Back to Kiosk</button></div>
           </form>
         </div>

@@ -34,14 +34,6 @@ export const DEPARTMENTS: Record<Department, { id: Department; label: string; ic
   accounting: { id: 'accounting', label: 'Accounting', icon: '🧾', counters: ['Accounting Counter 1', 'Accounting Counter 2'], transferTargets: [] },
 }
 
-export const ADMIN_ACCOUNTS = [
-  { username: 'admin', password: 'admin123', name: 'Juan Dela Cruz', role: 'Registrar Administrator', department: 'registrar' as Department },
-  { username: 'cashier', password: 'cashier123', name: 'Maria Santos', role: 'Cashier Administrator', department: 'cashier' as Department },
-  { username: 'accounting', password: 'acctg123', name: 'Pedro Reyes', role: 'Accounting Administrator', department: 'accounting' as Department },
-]
-
-export type AdminAccount = (typeof ADMIN_ACCOUNTS)[number]
-
 export const ADMIN_NAV_BY_DEPARTMENT: Record<Department, readonly { id: string; icon: string; label: string }[]> = {
   registrar: [
     { id: 'dashboard', icon: '📊', label: 'Dashboard' },

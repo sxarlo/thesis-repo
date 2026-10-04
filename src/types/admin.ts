@@ -7,4 +7,5 @@ export interface AdminProfile {
   display_name: string
   role: string
   department: Department
+  is_active: boolean
 }

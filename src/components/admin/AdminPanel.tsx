@@ -33,7 +33,6 @@ interface AdminPanelProps {
   department: Department
   queueDB: QueueDB
   onRequestLogout: () => void
-  onSwitchToKiosk: () => void
   dateStr: string
 }
 
@@ -45,7 +44,6 @@ export default function AdminPanel({
   department,
   queueDB,
   onRequestLogout,
-  onSwitchToKiosk,
   dateStr,
 }: AdminPanelProps) {
   const [queueFilter, setQueueFilter] = useState('pending')
@@ -87,7 +85,7 @@ export default function AdminPanel({
             <h2>{headingMap[adminScreen] || `${DEPARTMENTS[department].label} Dashboard`}</h2>
             <div className="admin-actions">
               <span className="date">{dateStr}</span>
-              <button className="btn btn-secondary" onClick={onSwitchToKiosk}>← Switch to Kiosk</button>
+              <button className="btn btn-danger" onClick={onRequestLogout}>Log Out</button>
             </div>
           </div>
           <div className="admin-content">

@@ -24,7 +24,7 @@ export default function WelcomeScreen({ active, timeStr, dateStr, onAdminClick, 
       <div className="kiosk-body">
         <div className="welcome-screen">
           <div className="welcome-icon">🎓</div>
-          <div className="welcome-content"><h2>Welcome to CEU</h2><p>Get a queue number for the Registrar, Cashier, or Accounting. Touch start to choose the department you need.</p></div>
+          <div className="welcome-content"><h2>Welcome to CEU</h2><p>Get a queue ticket or explore the campus map. Touch start to continue.</p></div>
           <button className="welcome-btn" onClick={onStart}><span>Touch to Start</span> <span>→</span></button>
         </div>
       </div>

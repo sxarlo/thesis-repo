@@ -1472,3 +1472,52 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* ---- Service Selection Panel (Welcome -> Queue Ticket / Explore Map) ---- */
+.service-select {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 100%;
+  width: 100%;
+  gap: 28px;
+}
+.service-select-intro h2 {
+  font-size: 42px;
+  font-weight: 800;
+  color: var(--ceu-pink-dark);
+  margin-bottom: 8px;
+}
+.service-select-intro p {
+  font-size: 18px;
+  color: var(--gray-500);
+  max-width: 520px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+.service-select-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 320px));
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+}
+.service-select-grid .service-card {
+  min-height: 240px;
+  justify-content: center;
+}
+.service-select-grid .service-card h3 {
+  font-size: 16px;
+  letter-spacing: 0.5px;
+}
+@media (max-width: 640px) {
+  .service-select-grid {
+    grid-template-columns: 1fr;
+  }
+  .service-select-intro h2 {
+    font-size: 30px;
+  }
+}
+

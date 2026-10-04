@@ -4,6 +4,7 @@ import KioskHeader from './KioskHeader'
 
 interface DepartmentSelectScreenProps {
   active: boolean
+  onBack: () => void
   onSelectDepartment: (dept: Department) => void
   onViewMonitor: (dept: Department) => void
 }
@@ -20,13 +21,14 @@ const DEPT_DESCRIPTION: Record<Department, string> = {
   accounting: 'Get a queue number for accounting concerns',
 }
 
-export default function DepartmentSelectScreen({ active, onSelectDepartment, onViewMonitor }: DepartmentSelectScreenProps) {
+export default function DepartmentSelectScreen({ active, onBack, onSelectDepartment, onViewMonitor }: DepartmentSelectScreenProps) {
   const depts = Object.keys(DEPARTMENTS) as Department[]
   return (
     <div className={`screen${active ? ' active' : ''}`}>
       <KioskHeader
         title="Select Department"
         subtitle="Which office do you need?"
+        right={<button className="back-btn" onClick={onBack}>← Back</button>}
       />
       <div className="kiosk-body">
         <div className="services-grid">

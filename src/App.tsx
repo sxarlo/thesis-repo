@@ -7,7 +7,6 @@ import { useKioskHistory } from './hooks/useKioskHistory'
 import { useNotification } from './hooks/useNotification'
 import { useQueueDB } from './hooks/useQueueDB'
 import { useTransactionForms } from './hooks/useTransactionForms'
-import { supabase } from './lib/supabase'
 import AdminLoginScreen from './components/admin/AdminLoginScreen'
 import AdminPanel from './components/admin/AdminPanel'
 import ClaimDocumentScreen from './components/kiosk/ClaimDocumentScreen'
@@ -18,6 +17,7 @@ import InquiryScreen from './components/kiosk/InquiryScreen'
 import MapScreen from './components/kiosk/MapScreen'
 import QueueMonitorScreen from './components/kiosk/QueueMonitorScreen'
 import QueueResultScreen from './components/kiosk/QueueResultScreen'
+import ServiceSelectScreen from './components/kiosk/ServiceSelectScreen'
 import ServicesScreen from './components/kiosk/ServicesScreen'
 import StatusCheckScreen from './components/kiosk/StatusCheckScreen'
 import WelcomeScreen from './components/kiosk/WelcomeScreen'
@@ -25,41 +25,27 @@ import WelcomeScreen from './components/kiosk/WelcomeScreen'
 function App() {
   const [screen, setScreen] = useState('kiosk-welcome')
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [authReady, setAuthReady] = useState(false)
   const initialAuthHandledRef = useRef(false)
 
   const showScreen = useCallback((id: string) => {
     setScreen(id)
   }, [])
 
-  // Check for existing session on mount
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsAuthenticated(!!session)
-      setAuthReady(true)
-    })
-  }, [])
+  // Screen to return to when leaving the interactive map.
+  const [mapReturn, setMapReturn] = useState('kiosk-services')
 
-  // After auth is ready, redirect to admin if session exists on welcome screen
-  useEffect(() => {
-    if (!authReady || initialAuthHandledRef.current) return
-    initialAuthHandledRef.current = true
-    if (isAuthenticated && screen === 'kiosk-welcome') {
-      showScreen('admin-panel')
+  const openMap = useCallback((returnTo: string) => {
+    setMapReturn(returnTo)
+    showScreen('interactive-map')
+  }, [showScreen])
+
+  const handleKioskNav = useCallback((id: string) => {
+    if (id === 'interactive-map') {
+      openMap('kiosk-services')
+      return
     }
-  }, [authReady, isAuthenticated, screen, showScreen])
-
-  // Sync auth state — redirect to kiosk if session is lost
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session)
-      if (!session && screen === 'admin-panel') {
-        showScreen('kiosk-welcome')
-      }
-    })
-    return () => subscription.unsubscribe()
-  }, [screen, showScreen])
+    showScreen(id)
+  }, [openMap, showScreen])
 
   useKioskHistory(screen, showScreen)
 
@@ -68,15 +54,11 @@ function App() {
     onTrigger: () => showScreen('admin-login-screen'),
   })
 
-  const { notification, showNotif } = useNotification()
-  const { timeStr, dateStr } = useClock()
-  const queueDB = useQueueDB({ notify: showNotif })
-  const forms = useTransactionForms({ addToQueue: queueDB.addToQueue, notify: showNotif })
   const {
     adminScreen,
     setAdminScreen,
     account,
-    department,
+    sessionReady,
     loginError,
     setLoginError,
     loginUsername,
@@ -88,6 +70,21 @@ function App() {
     handleLogin,
     handleLogout,
   } = useAdminAuth({ onNavigate: showScreen })
+
+  // After the session has been restored at boot, open the admin panel if a
+  // valid admin account exists and the user is still on the welcome screen
+  useEffect(() => {
+    if (!sessionReady || initialAuthHandledRef.current) return
+    initialAuthHandledRef.current = true
+    if (account && screen === 'kiosk-welcome') {
+      showScreen('admin-panel')
+    }
+  }, [sessionReady, account, screen, showScreen])
+
+  const { notification, showNotif } = useNotification()
+  const { timeStr, dateStr } = useClock()
+  const queueDB = useQueueDB({ notify: showNotif, canMutate: account !== null })
+  const forms = useTransactionForms({ addToQueue: queueDB.addToQueue, notify: showNotif })
 
   useEffect(() => {
     if (screen !== 'admin-login-screen') return
@@ -104,7 +101,7 @@ function App() {
     handleLogout()
   }, [handleLogout])
 
-  const showKiosk = authReady && !screen.startsWith('admin-')
+  const showKiosk = sessionReady && !screen.startsWith('admin-')
 
   return (
     <div className="app-container">
@@ -132,11 +129,19 @@ function App() {
             timeStr={timeStr}
             dateStr={dateStr}
             onAdminClick={() => showScreen('admin-login-screen')}
-            onStart={() => showScreen('select-department')}
+            onStart={() => showScreen('service-select')}
+          />
+
+          <ServiceSelectScreen
+            active={screen === 'service-select'}
+            onBack={() => showScreen('kiosk-welcome')}
+            onCreateQueue={() => showScreen('select-department')}
+            onExploreMap={() => openMap('service-select')}
           />
 
           <DepartmentSelectScreen
             active={screen === 'select-department'}
+            onBack={() => showScreen('service-select')}
             onSelectDepartment={dept => {
               forms.setLastQueueEntry(null)
               showScreen(dept === 'registrar' ? 'kiosk-services' : `${dept}-queue`)
@@ -146,7 +151,7 @@ function App() {
 
           <ServicesScreen
             active={screen === 'kiosk-services'}
-            onNavigate={showScreen}
+            onNavigate={handleKioskNav}
           />
 
           <DocumentRequestScreen
@@ -192,7 +197,7 @@ function App() {
           <QueueResultScreen
             active={screen === 'queue-result'}
             entry={forms.lastQueueEntry}
-            onNavigate={showScreen}
+            onNavigate={handleKioskNav}
           />
 
           <DirectQueueScreen
@@ -254,13 +259,13 @@ function App() {
             queue={queueDB.db.queue}
             documents={queueDB.db.documents}
             onBack={() => showScreen('kiosk-services')}
-            onShowMap={() => showScreen('interactive-map')}
+            onShowMap={() => openMap('kiosk-services')}
             notify={showNotif}
           />
 
           <MapScreen
             active={screen === 'interactive-map'}
-            onBack={() => showScreen('kiosk-services')}
+            onBack={() => showScreen(mapReturn)}
           />
         </>
       )}
@@ -279,17 +284,18 @@ function App() {
         onBack={() => showScreen('kiosk-welcome')}
       />
 
-      <AdminPanel
-        active={screen === 'admin-panel' && isAuthenticated}
-        adminScreen={adminScreen}
-        setAdminScreen={setAdminScreen}
-        account={account ?? { id: '', email: '', username: '', display_name: 'Admin', role: 'Administrator', department: 'registrar' as const }}
-        department={department}
-        queueDB={queueDB}
-        onRequestLogout={requestLogout}
-        onSwitchToKiosk={() => showScreen('kiosk-welcome')}
-        dateStr={dateStr}
-      />
+      {account && (
+        <AdminPanel
+          active={screen === 'admin-panel'}
+          adminScreen={adminScreen}
+          setAdminScreen={setAdminScreen}
+          account={account}
+          department={account.department}
+          queueDB={queueDB}
+          onRequestLogout={requestLogout}
+          dateStr={dateStr}
+        />
+      )}
     </div>
   )
 }

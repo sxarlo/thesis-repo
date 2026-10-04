@@ -10,8 +10,7 @@ import {
   updateDocumentStatus,
   selectTickets,
   selectDocuments,
-  deleteAllTickets,
-  deleteAllDocuments,
+  resetQueueSystem,
   subscribeToChanges,
 } from '../services/supabase-db'
 import type { AddToQueueOptions, DB, Department, DocEntry, QueueEntry, SettingsForm } from '../types/queue'
@@ -19,9 +18,12 @@ import { assignNextPending } from '../utils/queue'
 
 export interface UseQueueDBOptions {
   notify: (msg: string, type?: string) => void
+  // True only while a verified admin account is present. Gates every
+  // authenticated-only mutation trigger (auto-call timer, Reset System).
+  canMutate: boolean
 }
 
-export function useQueueDB({ notify: showNotif }: UseQueueDBOptions) {
+export function useQueueDB({ notify: showNotif, canMutate }: UseQueueDBOptions) {
   const [db, setDb] = useState<DB>(() => {
     const loaded = loadFromStorage()
     if (loaded) {
@@ -252,6 +254,7 @@ export function useQueueDB({ notify: showNotif }: UseQueueDBOptions) {
 
   // ─── AUTO CALL ─────────────────────────────────────────────────────────────
   const autoCall = useCallback(async () => {
+    if (!canMutate) return
     const calls: { id: string; number: string; counter: string }[] = []
     const updatedIds = new Map<string, string>()
     ;(Object.keys(DEPARTMENTS) as Department[]).forEach(dept => {
@@ -287,7 +290,7 @@ export function useQueueDB({ notify: showNotif }: UseQueueDBOptions) {
         return counter ? { ...q, counter, status: 'serving' as const, estimatedWait: 0 } : q
       })),
     }))
-  }, [db.queue, updateDB, showNotif])
+  }, [canMutate, db.queue, updateDB, showNotif])
 
   const autoCallRef = useRef<() => void>(() => {})
   useEffect(() => {
@@ -295,11 +298,12 @@ export function useQueueDB({ notify: showNotif }: UseQueueDBOptions) {
   })
 
   useEffect(() => {
+    if (!canMutate) return
     if (!db.settings.autoCallNext) return
     const minutes = Math.max(1, Number(db.settings.estimatedMinutesPerTransaction) || 10)
     const id = setInterval(() => autoCallRef.current(), minutes * 60 * 1000)
     return () => clearInterval(id)
-  }, [db.settings.autoCallNext, db.settings.estimatedMinutesPerTransaction])
+  }, [canMutate, db.settings.autoCallNext, db.settings.estimatedMinutesPerTransaction])
 
   // ─── TRANSFER ──────────────────────────────────────────────────────────────
   const transferTicket = useCallback(async (id: string, target: Department) => {
@@ -479,12 +483,16 @@ export function useQueueDB({ notify: showNotif }: UseQueueDBOptions) {
 
   // ─── RESET ─────────────────────────────────────────────────────────────────
   const resetSystem = useCallback(async () => {
-    const [ticketsErr, docsErr] = await Promise.all([
-      deleteAllTickets(),
-      deleteAllDocuments(),
-    ])
-    if (ticketsErr || docsErr) {
-      console.warn('[Supabase] resetSystem delete:', ticketsErr || docsErr)
+    if (!canMutate) {
+      showNotif('Reset requires an active admin session.', 'warning')
+      return
+    }
+
+    // Server-side RPC: deletes all tickets/documents only when called by an
+    // authenticated, active registrar admin (see phase1-rbac-hardening.sql)
+    const err = await resetQueueSystem()
+    if (err) {
+      console.warn('[Supabase] resetSystem:', err)
       showNotif('Reset failed. Cloud data could not be deleted.', 'warning')
       return
     }
@@ -494,7 +502,7 @@ export function useQueueDB({ notify: showNotif }: UseQueueDBOptions) {
     saveToStorage(def)
     setSettingsForm({ autoCallNext: def.settings.autoCallNext, interval: def.settings.estimatedMinutesPerTransaction })
     showNotif('Reset done.', 'info')
-  }, [showNotif])
+  }, [canMutate, showNotif])
 
   return {
     db,
