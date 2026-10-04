@@ -61,7 +61,7 @@ function App() {
     return () => subscription.unsubscribe()
   }, [screen, showScreen])
 
-  useKioskHistory(screen, showScreen, isAuthenticated)
+  useKioskHistory(screen, showScreen)
 
   useHiddenAdminGesture({
     enabled: screen === 'select-department',
