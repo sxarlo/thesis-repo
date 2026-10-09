@@ -78,6 +78,20 @@
   align-items: center;
   gap: 16px;
 }
+/* Hidden maintenance tap target (5 rapid taps on the branding).
+   Deliberately styled as inert: no pointer cue, no text selection,
+   no tap highlight, and no double-tap zoom delay on touch kiosks. */
+.kiosk-header-left.kiosk-tappable {
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.kiosk-header-left.kiosk-tappable img {
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
 .kiosk-logo {
   width: 48px;
   height: 48px;
@@ -92,6 +106,7 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+  padding: 2px;
 }
 .kiosk-title {
   display: flex;
@@ -105,10 +120,11 @@
 }
 .kiosk-title span {
   font-size: 12px;
-  opacity: 0.85;
-  font-weight: 400;
+  opacity: 1;
+  font-weight: 600;
   letter-spacing: 1px;
   text-transform: uppercase;
+  color: var(--white);
 }
 .kiosk-header-right {
   display: flex;
@@ -118,7 +134,8 @@
 .kiosk-time {
   text-align: right;
   font-size: 14px;
-  opacity: 0.9;
+  opacity: 1;
+  color: var(--white);
 }
 .kiosk-time .time {
   font-size: 20px;
@@ -163,19 +180,26 @@
     transform: scale(1.05);
   }
 }
+.welcome-content {
+  position: relative;
+  z-index: 10;
+}
 .welcome-content h2 {
   font-size: 42px;
   font-weight: 800;
-  color: var(--ceu-pink-dark);
+  color: #6b0000;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
   margin-bottom: 8px;
 }
 .welcome-content p {
   font-size: 18px;
-  color: var(--gray-500);
+  color: #1f2937;
   max-width: 500px;
   line-height: 1.6;
 }
 .welcome-btn {
+  position: relative;
+  z-index: 10;
   padding: 20px 60px;
   font-size: 22px;
   font-weight: 700;
@@ -196,6 +220,28 @@
 }
 .welcome-btn:active {
   transform: translateY(0);
+}
+/* Ambient campus watermark — Home/Welcome screen only */
+.welcome-home {
+  position: relative;
+  isolation: isolate;
+}
+.welcome-home::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: url('./assets/ceu-background.jpg') center center / cover no-repeat;
+  opacity: 0.25;
+}
+.welcome-home::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.2);
 }
 .services-grid {
   display: grid;
@@ -694,6 +740,7 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+  padding: 2px;
 }
 .login-card h2 {
   font-size: 22px;
@@ -750,6 +797,7 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+  padding: 2px;
 }
 .admin-sidebar-header .text h2 {
   font-size: 15px;

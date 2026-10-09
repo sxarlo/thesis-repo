@@ -285,8 +285,153 @@
   font-size: 17px;
 }
 
+/* --- Search bar + autocomplete (feature addition, scoped like the rest) --- */
+.im-root .im-search {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  min-width: 260px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--im-ink);
+}
+
+.im-root .im-search label {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.im-root .im-search-field {
+  display: flex;
+  align-items: center;
+  background: var(--im-bg);
+  border: 2px solid var(--im-line);
+  border-radius: 12px;
+}
+
+.im-root .im-search-field:focus-within {
+  border-color: var(--im-acc);
+}
+
+.im-root .im-search-ico {
+  padding-left: 12px;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.im-root .im-search input {
+  flex: 1;
+  min-width: 0;
+  padding: 13px 10px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--im-ink);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.im-root .im-search input::placeholder {
+  color: var(--im-mut);
+  font-weight: 500;
+}
+
+.im-root button.im-search-clear {
+  margin-right: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 2px solid var(--im-line);
+  background: #fff;
+  color: var(--im-mut);
+  font-size: 14px;
+  line-height: 1;
+}
+
+.im-root button.im-search-clear:hover {
+  border-color: var(--im-acc);
+  color: var(--im-acc);
+}
+
+.im-root .im-suggest {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  max-height: 330px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--im-card);
+  border: 1px solid var(--im-line);
+  border-radius: 14px;
+  box-shadow: 0 16px 36px rgba(58, 36, 48, 0.2);
+}
+
+.im-root .im-sug {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.im-root .im-sug.on {
+  background: rgba(232, 99, 143, 0.16);
+}
+
+.im-root .im-sug-ico {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.im-root .im-sug-txt {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.im-root .im-sug-txt b {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.im-root .im-sug-txt em {
+  font-style: normal;
+  font-size: 12.5px;
+  color: var(--im-mut);
+}
+
+.im-root .im-sug-floor {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--im-acc);
+  border-radius: 999px;
+  padding: 3px 9px;
+  white-space: nowrap;
+}
+
+.im-root .im-sug-empty {
+  padding: 12px;
+  color: var(--im-mut);
+  font-size: 14px;
+  font-weight: 600;
+}
+
 @media (max-width: 600px) {
   .im-root label {
+    min-width: 100%;
+  }
+
+  .im-root .im-search {
     min-width: 100%;
   }
 }

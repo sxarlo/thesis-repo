@@ -10,15 +10,13 @@ interface WelcomeScreenProps {
 
 export default function WelcomeScreen({ active, timeStr, dateStr, onAdminClick, onStart }: WelcomeScreenProps) {
   return (
-    <div className={`screen${active ? ' active' : ''}`}>
+    <div className={`screen${active ? ' active' : ''} welcome-home`}>
       <KioskHeader
         title="University Service Kiosk"
         subtitle="Centro Escolar University - Malolos"
+        onBrandingTap={onAdminClick}
         right={
-          <>
-            <div className="kiosk-time"><span className="time">{timeStr}</span><span className="date" style={{ fontSize: 11, opacity: 0.7 }}>{dateStr}</span></div>
-            <button className="btn" style={{ background: 'rgba(255,255,255,0.15)', color: 'var(--white)', padding: '8px 16px', fontSize: 12, borderRadius: 8 }} onClick={onAdminClick}>Admin</button>
-          </>
+          <div className="kiosk-time"><span className="time">{timeStr}</span><span className="date" style={{ fontSize: 11 }}>{dateStr}</span></div>
         }
       />
       <div className="kiosk-body">

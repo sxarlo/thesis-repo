@@ -1,28 +1,15 @@
 import { useCallback, useState } from 'react'
-import { CHIPS, COL, FLOORS, FLOOR_ORDER, SC, START, STAIR_IDS, VIEW_BOX, type FloorNum, type RoomTuple } from './data'
+import { CHIPS, COL, FLOORS, FLOOR_ORDER, SC, START, VIEW_BOX, type FloorNum, type RoomTuple } from './data'
 import { ALL_LAYOUTS, BOX_RENDERS, ROOM_RENDERS, type LabelLayout } from './labels'
 import { buildGraph, type MapNode } from './graph'
 import { astar, type PathResult } from './astar'
 import { buildSteps, floorName, type Step } from './directions'
+import { LOCATION_BY_ID, MAP_LOCATIONS, searchLocations } from './locations'
+import MapSearchBar from './MapSearchBar'
 
 const GRAPH = buildGraph()
 
-interface DestOption {
-  v: string
-  t: string
-}
-
-const DEST_GROUPS: { f: FloorNum; label: string; options: DestOption[] }[] = FLOOR_ORDER.map(f => {
-  const rooms = FLOORS[f].R
-    .filter(r => `${f}:${r[0]}` !== START)
-    .map(r => ({ v: `${f}:${r[0]}`, t: r[5] + (r[6] ? ' – ' + r[6] : '') }))
-  const pts = FLOORS[f].P
-    .filter(p => !STAIR_IDS.includes(p[0]))
-    .map(p => ({ v: `${f}:${p[0]}`, t: p[1] }))
-  return { f, label: `Floor ${f}`, options: [...rooms, ...pts] }
-})
-
-const DEST_IDS = new Set(DEST_GROUPS.flatMap(g => g.options.map(o => o.v)))
+const DEST_IDS = new Set(MAP_LOCATIONS.map(l => l.id))
 
 const LEGEND: [string, string][] = [
   ['#a8e063', 'Classrooms'],
@@ -92,14 +79,22 @@ function RoomRect({
 export default function IndoorMap() {
   const [floor, setFloor] = useState<FloorNum>(1)
   const [dest, setDest] = useState('')
+  const [query, setQuery] = useState('')
   const [hasRun, setHasRun] = useState(false)
   const [res, setRes] = useState<PathResult | null>(null)
   const [steps, setSteps] = useState<Step[]>([])
   const [stepIdx, setStepIdx] = useState(0)
 
+  const labelOf = useCallback((id: string) => {
+    const loc = LOCATION_BY_ID[id]
+    if (!loc) return ''
+    return loc.detail ? `${loc.name} – ${loc.detail}` : loc.name
+  }, [])
+
   const run = useCallback((raw: string) => {
     const g = DEST_IDS.has(raw) ? raw : ''
     setDest(g)
+    setQuery(g && LOCATION_BY_ID[g] ? labelOf(g) : '')
     setHasRun(true)
     if (!g || g === START) {
       setRes(null)
@@ -120,13 +115,19 @@ export default function IndoorMap() {
     setRes(found)
     setSteps(built)
     setStepIdx(0)
-    if (built.length) setFloor(built[0].f as FloorNum)
-  }, [])
+    const destFloor = GRAPH.nodes[g].f as FloorNum | undefined
+    setFloor(destFloor ?? (built.length ? (built[0].f as FloorNum) : 1))
+  }, [labelOf])
 
   const pick = useCallback((id: string) => {
-    if (id === START) return
     run(id)
   }, [run])
+
+  /** Navigates to whatever the search box currently holds, else the last pick. */
+  const getDirections = useCallback(() => {
+    const hit = query.trim() ? searchLocations(query, 1)[0] : undefined
+    run(hit ? hit.id : dest)
+  }, [query, dest, run])
 
   const clear = useCallback(() => run(''), [run])
 
@@ -172,20 +173,8 @@ export default function IndoorMap() {
           📍 You are here
           <div className="im-fake-input">Registrar (Kiosk)</div>
         </label>
-        <label>
-          🎯 Where do you want to go?
-          <select value={dest} onChange={e => run(e.target.value)}>
-            <option value="">Select destination</option>
-            {DEST_GROUPS.map(g => (
-              <optgroup key={g.f} label={g.label}>
-                {g.options.map(o => (
-                  <option key={o.v} value={o.v}>{o.t}</option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        </label>
-        <button onClick={() => run(dest)}>Get Directions</button>
+        <MapSearchBar value={query} onChange={setQuery} onSelect={pick} onClear={clear} />
+        <button onClick={getDirections}>Get Directions</button>
         <button className="im-sec" onClick={clear}>Clear</button>
       </div>
 
